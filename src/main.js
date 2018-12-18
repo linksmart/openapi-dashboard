@@ -7,7 +7,9 @@ import Vuex from 'vuex';
 import VueRouter from 'vue-router';
 import 'bootstrap';
 
-import axios from 'axios';
+window.axios = require('axios');
+window._ = require('lodash');
+
 import VueGoodTablePlugin from 'vue-good-table';
 
 import store from './swaggerstore';
