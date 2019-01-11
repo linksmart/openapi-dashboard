@@ -16,6 +16,7 @@ import store from './swaggerstore';
 import Dashboard from "./components/Dashboard.vue";
 import Explorer from "./components/Explorer.vue";
 import Crud from "./components/Crud.vue";
+import Post from "./components/Post.vue";
 
 import 'vue-good-table/dist/vue-good-table.css'
 import Noty from 'noty';
@@ -46,6 +47,11 @@ const routes = [{
     name: 'crud',
     path: '/crud',
     component: Crud,
+  },
+  {
+    name: 'post',
+    path: '/post',
+    component: Post,
   },
 ];
 

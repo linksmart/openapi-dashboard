@@ -41,6 +41,8 @@
     import SelectEntryPointModal from './modals/SelectEntryPointModal.vue';
     import PostModal from './modals/PostModal.vue';
 
+    const _ = require("lodash")
+
     export default {
 
         props: ['group','propIndex'],
@@ -89,9 +91,18 @@
             },
             initPostModal(path,method) {
                 this.request_body = this.getRequestByPathAndMethod(path,method);
+                let request_parameters = this.getParametersByPathAndMethod(path,method);
                 this.selectedPath = path;
                 this.selectedMethod = method;
-                this.showPostModal = true;
+                this.$router.push({
+                    name: 'post',
+                    params: {
+                        request_body : _.cloneDeep(this.request_body),
+                        request_parameters : request_parameters,
+                        selectedPath : path,
+                        selectedMethod : method
+                        }
+                    });
             },
             startCrud(payload) {
                 this.showModal = false;
