@@ -1,25 +1,23 @@
 <template>
 <div class="container-fluid">
-    <div class="card">
+
+    <div class="card" v-if="request_parameters">
         <div class="card-header">
-            <ul class="nav nav-pills mb-3" role="tablist" id="nav-tab-items">
-                <li class="nav-item">
-                    <a class="nav-link active" id="post_form" data-toggle="pill" href="#pills-post-form" role="tab" aria-controls="pills-post-form" aria-selected="true">Post form</a>
-                </li>
-                <li class="nav-item" v-if="request_parameters">
-                    <a class="nav-link" id="param_form" data-toggle="pill" href="#pills-param-form" role="tab" aria-controls="pills-param-form" aria-selected="true">Params form</a>
-                </li>
-            </ul>
+            Params form
         </div>
         <div class="card-body">
-            <div class="tab-content">
-                <div class="tab-pane fade show active" id="pills-post-form" role="tabpanel" aria-labelledby="post_form">
-                    <vue-bootstrap4-form-generator :model="model" :schema="schema" :defaults="defaults" />
-                </div>
-                <div v-if="request_parameters" class="tab-pane fade show" id="pills-param-form" role="tabpanel" aria-labelledby="param_form">
-                    <vue-bootstrap4-form-generator :model="req_params_model" :schema="req_params_schema" :defaults="req_params_defaults" />
-                </div>
-            </div>
+            <vue-bootstrap4-form-generator :model="req_params_model" :schema="req_params_schema" :defaults="req_params_defaults" />
+        </div>
+    </div>
+
+    <br>
+
+    <div class="card">
+        <div class="card-header">
+            Post form
+        </div>
+        <div class="card-body">
+            <vue-bootstrap4-form-generator :model="model" :schema="schema" :defaults="defaults" />
             <br>
             <button type="button" class="btn btn-primary" @click="postForm">Post</button>
         </div>
@@ -265,7 +263,7 @@ export default {
     },
     computed: {
         ...mapGetters([
-            'ROOT_URL',
+            'SERVER_URL',
         ]),
         fullUrl() {
             let params = {};
@@ -283,9 +281,9 @@ export default {
             }
 
             if (_.isEmpty(uriPath)) {
-                return this.ROOT_URL+this.selectedPath;
+                return this.SERVER_URL+this.selectedPath;
             } else {
-                return this.ROOT_URL+uriPath;
+                return this.SERVER_URL+uriPath;
             }
 
         }

@@ -11,7 +11,10 @@
                     <span v-if="props.column.label == 'Actions'">
                         <div class="btn-group" role="group" aria-label="Actions">
                             <a v-if='props.row.method == "get" && IS_CRUDABLE(props.row.path,props.row.method)' href="#" @click.prevent='showSelectEntryPointModal(props.row.path,props.row.method)' data-toggle="tooltip" data-placement="top" title="CRUD" class="btn btn-sm btn-secondary btn-action">
-                                <i class="fas fa-chevron-right"></i>
+                                <i class="fas fa-table"></i>
+                            </a>
+                            <a v-if='props.row.method == "get"' href="#" @click.prevent='showFormViewModal(props.row.path,props.row.method)' data-toggle="tooltip" data-placement="top" title="Form-view" class="btn btn-sm btn-secondary btn-action">
+                                <i class="fab fa-wpforms"></i>
                             </a>
                             <a v-if='props.row.method == "post"' href="#" @click.prevent='initPostModal(props.row.path,props.row.method)' data-toggle="tooltip" data-placement="top" title="POST" class="btn btn-sm btn-primary btn-action">
                                 <i class="fas fa-chevron-right"></i>
@@ -49,6 +52,7 @@
         data: function () {
             return {
                 showModal: false,
+                showFormViewModal: false,
                 showPostModal: false,
                 columns: [
                     {
@@ -88,6 +92,13 @@
                 this.selectedPath = path;
                 this.selectedMethod = method;
                 this.showModal = true;
+            },
+            showFormViewModal(path,method) {
+                this.response = this.getResponseByPathAndMethod(path,method);
+                this.parameters = this.getParametersByPathAndMethod(path,method);
+                this.selectedPath = path;
+                this.selectedMethod = method;
+                this.showFormViewModal = true;
             },
             initPostModal(path,method) {
                 this.request_body = this.getRequestByPathAndMethod(path,method);

@@ -100,7 +100,7 @@ export default {
     },
     computed: {
         ...mapGetters([
-        'ROOT_URL',
+        'SERVER_URL',
         ]),
         fullUrl() {
             let params = {};
@@ -117,9 +117,9 @@ export default {
             }
 
             if (_.isEmpty(uriPath)) {
-                return this.ROOT_URL+this.path;
+                return this.SERVER_URL+this.path;
             } else {
-                return this.ROOT_URL+uriPath;
+                return this.SERVER_URL+uriPath;
             }
 
         }
