@@ -16,7 +16,9 @@ export default new Vuex.Store({
   state: {
       original_config : {},
       config : {},
-      rootUrl: ""
+      serverUrl: "",
+      swaggerConfigUrl: "",
+
   },
   mutations: {
       setConfig: (state,config) => {
@@ -25,8 +27,11 @@ export default new Vuex.Store({
       setOriginalConfig: (state,config) => {
         Vue.set(state,'original_config',config)
     },
-      setRootUrl: (state,url) => {
-        Vue.set(state,'rootUrl',url)
+      setServerUrl: (state,url) => {
+        Vue.set(state,'serverUrl',url)
+    },
+      setSwaggerConfigUrl: (state,url) => {
+        Vue.set(state,'swaggerConfigUrl',url)
     },
   },
   actions: {
@@ -54,8 +59,12 @@ export default new Vuex.Store({
         return state.config.tags;
     },
 
-    ROOT_URL: state => {
-        return state.rootUrl;
+    SERVER_URL: state => {
+        return state.serverUrl;
+    },
+
+    SWAGGER_CONFIG_URL: state => {
+        return state.swaggerConfigUrl;
     },
 
     IS_TAGS_EMPTY: state => {

@@ -17,14 +17,6 @@ var SwaggerParser = require('swagger-parser');
 import { mapMutations,mapGetters } from 'vuex'
 import Info from './info/Info.vue';
 import TagTable from './TagTable.vue';
-var _ = {
-  isEmpty: require('lodash/isEmpty'),
-  map: require('lodash/map'),
-  find: require('lodash/find'),
-  has: require('lodash/has'),
-  forEach: require('lodash/forEach'),
-  includes: require('lodash/includes'),
-};
 
 export default {
     data: function () {
@@ -37,15 +29,59 @@ export default {
         TagTable
     },
     mounted(){
-        if (this.IS_CONFIG_EMPTY) {
-            this.$router.push({'name':'dashboard'})
+
+        if (this.SERVER_URL === "" && localStorage.serverUrl && localStorage.serverUrl != "") {
+            this.setServerUrl(localStorage.serverUrl);
         }
-        this.groupPathByTags();
+
+        if (this.SWAGGER_CONFIG_URL === "" &&  localStorage.swaggerConfigUrl && localStorage.swaggerConfigUrl != "") {
+            this.setSwaggerConfigUrl(localStorage.swaggerConfigUrl);
+        }
+
+        if (this.IS_CONFIG_EMPTY) {
+            if (this.SWAGGER_CONFIG_URL != "") {
+                this.fetchSwaggerJson(this.SWAGGER_CONFIG_URL);
+            } else {
+                this.$router.push({'name':'dashboard'})
+            }
+        } else {
+            this.groupPathByTags();
+        }
     },
     methods: {
         ...mapMutations( [
         'setConfig',
+        'setOriginalConfig',
+        'setServerUrl',
+        'setSwaggerConfigUrl',
         ]),
+        fetchSwaggerJson(swaggerConfigUrl) {
+
+            let self = this;
+
+            axios.get(swaggerConfigUrl)
+                .then(function (response) {
+                    // storing origial congif before dereferencing
+                    let swaggerConfig = response.data;
+                    self.setOriginalConfig(swaggerConfig);
+
+                    // deferencing swagger config to resolve references
+                    SwaggerParser.dereference(_.cloneDeep(swaggerConfig))
+                        .then(function (api) {
+                            self.config = api;
+                            self.setConfig(api);
+                            self.groupPathByTags();
+                        }).catch(function (error) {
+                            // handle error
+                            console.log('unable to fetch swagger config error go');
+                            // self.$router.push({'name':'dashboard'})
+                        });
+
+                }).catch((error) => {
+                    // self.$router.push({'name':'dashboard'})
+                    console.log('unable to fetch swagger config error');
+                });
+        },
         updateRows() {
             // _.forEach(this.PATHS, function(value) {
             //     this.finds.push({ value: 'def' })
@@ -86,6 +122,8 @@ export default {
         'IS_TAGS_EMPTY',
         'TAGS',
         'TAGS_NAMES',
+        'SERVER_URL',
+        'SWAGGER_CONFIG_URL',
         ]),
     }
 }
