@@ -17,7 +17,7 @@
 
                     </div>
                     <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" @click='goToFormView'>Finish</button>
+                    <button type="button" class="btn btn-primary" @click='$emit("trigger-delete",fullUrl)'>Delete</button>
                     </div>
                 </div>
             </div>
@@ -31,6 +31,7 @@
     import RequestParametersForm from '../RequestParametersForm.vue';
 
     export default {
+        name: "DeleteModal",
         props: ['showModal','serverUrl','path','method','tableIndex','parameters'],
         data: function () {
             return {
@@ -46,9 +47,7 @@
             RequestParametersForm
         },
         methods: {
-            goToFormView() {
-                this.$emit('go-to-form-view',this.fullUrl);
-            },
+
         },
         watch: {
             showModal: function (val) {

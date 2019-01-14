@@ -51,7 +51,29 @@
                                             @closeModal="showFormViewModal=false"
                                             @go-to-form-view="goToFormView"
                                             />
+                <delete-modal :table-index='propIndex'
+                                :show-modal='showDeleteModal'
+                                :path='selectedPath'
+                                :method='selectedMethod'
+                                :server-url="SERVER_URL"
+                                :parameters="parameters"
+                                @closeModal="showDeleteModal=false"
+                                @trigger-delete="triggerDelete"/>
 
+                </div>
+                <div v-show='deleteError!=="" || deleteSuccess!==""' class="card-footer">
+                    <div v-show='deleteSuccess!==""' class="alert alert-success" role="alert">
+                        <button type="button" class="close" aria-label="Close" @click="deleteSuccess=''">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        <strong>Success!</strong> {{this.deleteSuccess}}
+                    </div>
+                    <div v-show='deleteError!==""' class="alert alert-danger" role="alert">
+                        <button type="button" class="close" aria-label="Close" @click="deleteError=''">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        <strong>Oh snap!</strong> {{this.deleteError}}
+                    </div>
                 </div>
             </div>
             <br>
@@ -64,6 +86,7 @@
     import Tag from './tag/Tag.vue';
     import SelectEntryPointModal from './modals/SelectEntryPointModal.vue';
     import FormViewParametersModal from './modals/FormViewParametersModal.vue';
+    import DeleteModal from './modals/DeleteModal.vue';
 
     const _ = require("lodash")
 
@@ -74,6 +97,7 @@
             return {
                 showModal: false,
                 showFormViewModal: false,
+                showDeleteModal:false,
                 columns: [
                     {
                         label: 'Path',
@@ -95,6 +119,8 @@
                 parameters: [],
                 selectedPath: '',
                 selectedMethod: '',
+                deleteSuccess:"",
+                deleteError:""
             }
         },
         mounted(){
@@ -104,6 +130,7 @@
             Tag,
             SelectEntryPointModal,
             FormViewParametersModal,
+            DeleteModal,
         },
         methods: {
             showSelectEntryPointModal(path,method) {
@@ -122,22 +149,28 @@
                 } else{
                     console.log("navigate to form view");
                 }
-                // this.response = this.getResponseByPathAndMethod(path,method);
-                // this.showFormViewModal = true;
             },
             handleDelete(path,method) {
                 this.parameters = this.getParametersByPathAndMethod(path,method);
                 if (this.parameters.length > 0) {
                     this.selectedPath = path;
                     this.selectedMethod = method;
-                    this.showFormViewModal = true;
+                    this.showDeleteModal = true;
                 } else{
-                    console.log("navigate to form view");
+                    this.triggerDelete(this.SERVER_URL+path);
                 }
-                // this.response = this.getResponseByPathAndMethod(path,method);
-                console.log(this.parameters);
-
-                // this.showFormViewModal = true;
+            },
+            triggerDelete(url) {
+                this.showDeleteModal = false;
+                axios.delete(url)
+                .then((response) => {
+                    this.deleteError = "";
+                    this.deleteSuccess = JSON.stringify(response.data);
+                })
+                .catch((error) => {
+                    this.deleteSuccess = "";
+                    this.deleteError = JSON.stringify(error.response.data);
+                })
             },
             initPost(path,method) {
                 this.request_body = this.getRequestByPathAndMethod(path,method);
