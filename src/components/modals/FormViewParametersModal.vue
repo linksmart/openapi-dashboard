@@ -4,17 +4,19 @@
             <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Select the data entry point for "{{path}}" ({{method}})</h5>
+                        <h5 class="modal-title">Request parameters for "{{path}}" ({{method}})</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close" @click="$emit('closeModal')">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
                     <div class="modal-body">
-                        <vue-form-generator :schema="schema" :model="model" :options="formOptions" @validated="onValidated"></vue-form-generator>
+                        <vue-bootstrap4-form-generator :model="req_params_model"
+                                                       :schema="req_params_schema"
+                                                       :defaults="req_params_defaults" />
 
                     </div>
                     <div class="modal-footer">
-                    <button type="button" :disabled='!isValidEntryData || parameter_form_invalid || selected_attributes.length == 0' class="btn btn-primary" @click='startCrud'>Start CRUD</button>
+                    <button type="button" class="btn btn-primary" @click='goToFormView'>Finish</button>
                     </div>
                 </div>
             </div>
@@ -24,187 +26,41 @@
 
 
 <script>
-    import VueJsonPretty from 'vue-json-pretty';
-    import VueFormGenerator from "vue-form-generator";
-    import SelectAttributes from '../SelectAttributes.vue';
-    var _ = {
-        isEmpty: require('lodash/isEmpty'),
-        find: require('lodash/find'),
-        has: require('lodash/has'),
-        forEach: require('lodash/forEach'),
-        findIndex: require('lodash/findIndex'),
-        isObject: require('lodash/isObject'),
-        includes: require('lodash/includes'),
-    };
+
+    import VueBootstrap4FormGenerator from "vue-bootstrap4-form-generator"
+    var URI = require('urijs');
+    var URITemplate = require('urijs/src/URITemplate');
+
     export default {
-        props: ['showModal','response','path','method','tableIndex','parameters'],
+        props: ['showModal','serverUrl','path','method','tableIndex','parameters'],
         data: function () {
             return {
                 json_path:'',
                 entry_path:'',
                 clean_data_entry_path:'',
-                response_content: {},
                 entry_data: {},
                 entry_data_properties: {},
                 selected_attributes:[],
-                model: {},
-
-                schema: {
-                    fields: []
-                },
-
-                formOptions: {
-                    validateAfterLoad: true,
-                    validateAfterChanged: true,
-                    fieldIdPrefix: "table_" + this.tableIndex + "_"
-                },
+                req_params_model: {},
+                req_params_schema: {},
+                req_params_defaults: {},
 
                 parameter_form_invalid: false,
-                is_first_tab: true,
-                is_last_tab: false,
             }
         },
         mounted(){
             $(this.$refs.selectArrayModal).on('hidden.bs.modal', function (e) {
                 this.$emit('closeModal');
             }.bind(this));
-            this.model = this.generateModel(this.parameters);
-            this.schema = this.generateSchema(this.parameters);
 
-            let self = this;
-            $(`#nav-tab-items-${this.tableIndex} a[data-toggle="pill"]`).on('shown.bs.tab', function (e) {
-                if ($(e.target).parent().next('li').index() < 0) {
-                    self.is_last_tab = true;
-                    self.is_first_tab = false;
-                } else if ($(e.target).parent().prev('li').index() < 0) {
-                    self.is_first_tab = true;
-                    self.is_last_tab = false;
-                } else {
-                    self.is_first_tab = false;
-                    self.is_last_tab = false;
-                }
-            });
+            this.req_params_model = this.generateReqParamModel(this.parameters);
         },
         components: {
-            VueJsonPretty,
-            "vue-form-generator": VueFormGenerator.component,
-            SelectAttributes
+            VueBootstrap4FormGenerator
         },
         methods: {
-            onValidated(isValid, errors) {
-                this.parameter_form_invalid = !isValid;
-            },
-            next(){
-                if (this.isValidEntryData) {
-                    $(`#nav-tab-items-${this.tableIndex} a.active`).parent().next('li').find('a').trigger('click');
-                }
-            },
-            previous(){
-                $(`#nav-tab-items-${this.tableIndex} a.active`).parent().prev('li').find('a').trigger('click');
-            },
-            generateSchema(parameters) {
-                let fields = [];
-                let self = this;
-                let allowed_params = ["path","query"];
-                _.forEach(parameters,function(parameter,key){
-                    if (!_.includes(allowed_params,parameter.in)) {
-                        return;
-                    }
-                    let inputType = "text";
-
-                    if (_.has(parameter,"schema")) {
-                        if (parameter.schema.type === "number") {
-                            inputType = "number";
-                        }
-                    }
-
-                    let validator = null;
-                    if (parameter.required) {
-                        if (parameter.schema.type === "number") {
-                            validator = VueFormGenerator.validators.integer;
-                        } else {
-                            validator = VueFormGenerator.validators.string;
-                        }
-                    }
-
-                    fields.push({
-                        type: "input",
-                        inputType: inputType,
-                        label: parameter.name,
-                        model: (parameter.name + '.value'),
-                        required: parameter.required,
-                        validator: validator
-                    });
-                });
-                return {"fields":fields};
-            },
-            generateModel(parameters) {
-                let model = {};
-                let self = this;
-                let allowed_params = ["path","query"];
-                _.forEach(parameters,function(parameter,key){
-                    if (!_.includes(allowed_params,parameter.in)) {
-                        return;
-                    }
-                    model[parameter.name] = {};
-                    model[parameter.name]['type'] = parameter.in;
-                    model[parameter.name]['value'] = "";
-                    if (_.has(parameter,"schema")) {
-                        if (parameter.schema.type === "number") {
-                            model[parameter.name]['value'] = 0;
-                        }
-                    }
-                });
-                return model;
-            },
-            removeAttribute(config_path){
-                let index = _.findIndex(this.selected_attributes, { 'config_path': config_path});
-                if (index > -1) {
-                    this.selected_attributes.splice(index,1);
-                } else {
-                    this.showError('Attribute not found')
-                }
-            },
-            addAttribute(name,config_path,data_path,type){
-                this.selected_attributes.push({
-                    name: name,
-                    config_path: config_path,
-                    data_path: data_path,
-                    type: type,
-                    isRoot: false
-                });
-                this.showSuccess('"'+ name + '" attribute added successfully');
-            },
-            entryPointSelector(entry_path,entry_data) {
-                this.entry_path = entry_path;
-                this.entry_data = entry_data;
-            },
-            setRootId(selected_attribute) {
-                let self = this;
-                _.forEach(this.selected_attributes,function(value,key) {
-                    if (value.config_path !== selected_attribute.config_path) {
-                        self.selected_attributes[key].isRoot = false;
-                    }
-                });
-            },
-            startCrud() {
-                this.$emit('startCrud',{
-                    selected_attributes: this.selected_attributes,
-                    entry_data_properties: this.entry_data_properties,
-                    path: this.path,
-                    method: this.method,
-                    entry_data_path: this.clean_data_entry_path,
-                    request_params: this.model
-                });
-            },
-            resetData() {
-                this.entry_path = '';
-                this.entry_data = {};
-                this.response_content = {};
-                this.entry_data_properties = {};
-                this.selected_attributes = [];
-                $('#nav-tab-items-'+ this.tableIndex + ' li:first-child a').tab('show');
-                this.$emit("clearParameters");
+            goToFormView() {
+                this.$emit('go-to-form-view',this.fullUrl);
             },
             removeFirstDot(path) {
                 if (_.isEmpty(path)) {
@@ -214,68 +70,130 @@
                 } else {
                     return path;
                 }
-            }
+            },
+            generateReqParamModel(parameters) {
+                let model = {};
+                let self = this;
+                let allowed_params = ["path","query"];
+                _.forEach(parameters,function(parameter,key){
+                    if (!_.includes(allowed_params,parameter.in)) {
+                        return;
+                    }
+                    model[parameter.name] = "";
+                });
+                return model;
+            },
+            makeSchema(key, value) {
+
+                if (typeof value == "object" && !Array.isArray(value)) {
+                    let obj = {
+                        type: "Object",
+                        name: key,
+                        elements: []
+                    }
+                    _.forEach(value, function (value, key) {
+                        let result = this.makeSchema(key, value);
+                        obj.elements.push(result);
+                    }.bind(this));
+                    return obj;
+
+                } else if (typeof value == "string") {
+                    let element = {
+                        label: key,
+                        name: key,
+                        element_type: "input",
+                        type: "text",
+                        placeholder: ("Enter " + key)
+                    };
+                    return element;
+                } else if (typeof value == "number") {
+                    let element = {
+                        label: key,
+                        name: key,
+                        element_type: "input",
+                        type: "number",
+                        placeholder: ("Enter " + key)
+                    };
+                    return element;
+                } else if (typeof value == "boolean") {
+                    let element = {
+                        label: key,
+                        name: key,
+                        element_type: "input",
+                        type: "checkbox",
+                        placeholder: ""
+                    };
+                    return element;
+                } else if (Array.isArray(value)) {
+                    let obj = {
+                        type: "Array",
+                        name: key,
+                        schema: {}
+                    }
+                    let result = this.makeSchema(null, value[0]);
+                    if (typeof value[0] == "object") {
+                        obj.schema = result;
+                    } else {
+                        obj.schema.type = "input";
+                        obj.schema.element = result;
+                    }
+                    return obj;
+                }
+            },
 
         },
         computed: {
-            isValidEntryData() {
-                if (_.isEmpty(this.entry_data) || !_.has(this.entry_data,'type') || this.entry_data.type !== 'array') {
-                    return false;
+            fullUrl() {
+
+
+                let uriParams = {};
+                let queryParams = {};
+                let uriPath = '';
+                let fullPath = "";
+
+                this.parameters.forEach((param,key) => {
+                    if (param.in === 'path') {
+                        uriParams[param.name] = this.req_params_model[param.name];
+                    } else if (param.in === 'query') {
+                        queryParams[param.name] = this.req_params_model[param.name];
+                    }
+                });
+
+
+                if (!_.isEmpty(uriParams)) {
+                    uriPath = URITemplate(this.path).expand(uriParams);
                 }
-                return true;
-            },
-            cleanEntryPoint() {
-                return this.removeFirstDot(this.entry_path);
-            },
+
+                if (_.isEmpty(uriPath)) {
+                    fullPath = this.serverUrl+this.path;
+                } else {
+                    fullPath = this.serverUrl+uriPath;
+                }
+
+                fullPath = new URI(fullPath).addQuery(queryParams).toString();
+                return fullPath
+
+            }
         },
         watch: {
             showModal: function (val) {
                 if (val) {
-                    this.response_content = this.response.content;
                     $(this.$refs.selectArrayModal).modal('show');
                 } else {
-                    this.resetData();
+                    // this.resetData();
                     $(this.$refs.selectArrayModal).modal('hide');
                 }
             },
-            entry_data: {
-                handler: function(newValue) {
-                    if (!this.isValidEntryData) {
-                        // this.entry_data_properties = this.entry_data.items.properties;
-                        this.entry_data_properties = {}
-                    } else {
-                        this.entry_data_properties = this.entry_data.items.properties;
-                    }
-                    this.selected_attributes = [];
-                },
-                deep: true
-            },
             parameters: {
                 handler: function(newValue) {
-                    this.model = this.generateModel(this.parameters);
-                    this.schema = this.generateSchema(this.parameters);
+                    this.req_params_model = this.generateReqParamModel(this.parameters);
+                    this.req_params_schema = this.makeSchema(null,this.req_params_model);
+                    this.req_params_defaults = _.cloneDeep(this.req_params_model);
+                    // this.model = this.generateModel(this.parameters);
+                    // this.schema = this.generateSchema(this.parameters);
                 },
                 deep: true
-            },
-            entry_data_properties: {
-                handler: function(newValue) {
-                    this.selected_attributes = [];
-                },
-                deep: true
-            },
-            entry_path(val) {
-                let path = this.removeFirstDot(val);
-                let result = path.split(".");
-                result.splice(0,1);
-                path = result.join(".");
-                if (_.includes(path,"schema.properties")) {
-                    path = path.replace(/schema.properties./gi,'');
-                }
-                if (_.includes(path,".items.properties")) {
-                    path = path.replace(/.items.properties./gi,'.');
-                }
-                this.clean_data_entry_path = path;
-            },
+            }
         }
     }
 

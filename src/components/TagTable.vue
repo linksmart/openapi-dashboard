@@ -13,10 +13,10 @@
                             <a v-if='props.row.method == "get" && IS_CRUDABLE(props.row.path,props.row.method)' href="#" @click.prevent='showSelectEntryPointModal(props.row.path,props.row.method)' data-toggle="tooltip" data-placement="top" title="CRUD" class="btn btn-sm btn-secondary btn-action">
                                 <i class="fas fa-table"></i>
                             </a>
-                            <a v-if='props.row.method == "get"' href="#" @click.prevent='showFormViewModal(props.row.path,props.row.method)' data-toggle="tooltip" data-placement="top" title="Form-view" class="btn btn-sm btn-secondary btn-action">
+                            <a v-if='props.row.method == "get"' href="#" @click.prevent='handleFormView(props.row.path,props.row.method)' data-toggle="tooltip" data-placement="top" title="Form-view" class="btn btn-sm btn-secondary btn-action">
                                 <i class="fab fa-wpforms"></i>
                             </a>
-                            <a v-if='props.row.method == "post"' href="#" @click.prevent='initPostModal(props.row.path,props.row.method)' data-toggle="tooltip" data-placement="top" title="POST" class="btn btn-sm btn-primary btn-action">
+                            <a v-if='props.row.method == "post"' href="#" @click.prevent='initPost(props.row.path,props.row.method)' data-toggle="tooltip" data-placement="top" title="POST" class="btn btn-sm btn-primary btn-action">
                                 <i class="fas fa-chevron-right"></i>
                             </a>
                         </div>
@@ -29,8 +29,26 @@
 
                 </vue-good-table>
 
-                <SelectEntryPointModal :table-index='propIndex' :show-modal='showModal' :response='response' :parameters="parameters" :path='selectedPath' :method='selectedMethod' @closeModal="showModal=false" @startCrud="startCrud" @clearParameters="parameters=[]"/>
-                <PostModal :table-index='propIndex' :show-modal='showPostModal' :request-body='request_body' :path='selectedPath' :method='selectedMethod' @closeModal="showPostModal=false"/>
+                <SelectEntryPointModal :table-index='propIndex'
+                                       :show-modal='showModal'
+                                       :response='response'
+                                       :parameters="parameters"
+                                       :path='selectedPath'
+                                       :method='selectedMethod'
+                                       @closeModal="showModal=false"
+                                       @startCrud="startCrud"
+                                       @clearParameters="parameters=[]"/>
+
+                <form-view-parameters-modal :table-index='propIndex'
+                                            :show-modal='showFormViewModal'
+                                            :path='selectedPath'
+                                            :method='selectedMethod'
+                                            :server-url="SERVER_URL"
+                                            :parameters="parameters"
+                                            @closeModal="showFormViewModal=false"
+                                            @go-to-form-view="goToFormView"
+                                            />
+
                 </div>
             </div>
             <br>
@@ -42,7 +60,7 @@
     import { mapMutations,mapGetters } from 'vuex'
     import Tag from './tag/Tag.vue';
     import SelectEntryPointModal from './modals/SelectEntryPointModal.vue';
-    import PostModal from './modals/PostModal.vue';
+    import FormViewParametersModal from './modals/FormViewParametersModal.vue';
 
     const _ = require("lodash")
 
@@ -53,7 +71,6 @@
             return {
                 showModal: false,
                 showFormViewModal: false,
-                showPostModal: false,
                 columns: [
                     {
                         label: 'Path',
@@ -83,7 +100,7 @@
         components: {
             Tag,
             SelectEntryPointModal,
-            PostModal
+            FormViewParametersModal,
         },
         methods: {
             showSelectEntryPointModal(path,method) {
@@ -93,14 +110,21 @@
                 this.selectedMethod = method;
                 this.showModal = true;
             },
-            showFormViewModal(path,method) {
-                this.response = this.getResponseByPathAndMethod(path,method);
+            handleFormView(path,method) {
                 this.parameters = this.getParametersByPathAndMethod(path,method);
-                this.selectedPath = path;
-                this.selectedMethod = method;
-                this.showFormViewModal = true;
+                if (this.parameters.length > 0) {
+                    this.selectedPath = path;
+                    this.selectedMethod = method;
+                    this.showFormViewModal = true;
+                } else{
+                    console.log("navigate to form view");
+                }
+                // this.response = this.getResponseByPathAndMethod(path,method);
+                console.log(this.parameters);
+
+                // this.showFormViewModal = true;
             },
-            initPostModal(path,method) {
+            initPost(path,method) {
                 this.request_body = this.getRequestByPathAndMethod(path,method);
                 let request_parameters = this.getParametersByPathAndMethod(path,method);
                 this.selectedPath = path;
@@ -121,6 +145,17 @@
                 this.$nextTick(function () {
                     this.$router.push({ name: 'crud', params: payload});
                 });
+            },
+            goToFormView(url) {
+                this.showFormViewModal = false;
+                this.$nextTick(function () {
+                    this.$router.push({
+                        name: 'formView',
+                        params: {
+                            url
+                            }
+                    });
+                });
             }
         },
         computed: {
@@ -129,7 +164,8 @@
             "getResponseByPathAndMethod",
             "getParametersByPathAndMethod",
             "getRequestByPathAndMethod",
-            "IS_CRUDABLE"
+            "IS_CRUDABLE",
+            "SERVER_URL"
             ]),
             tag(){
                 return this.getTagByName(this.group.tag_name);

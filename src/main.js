@@ -17,6 +17,7 @@ import Dashboard from "./components/Dashboard.vue";
 import Explorer from "./components/Explorer.vue";
 import Crud from "./components/Crud.vue";
 import Post from "./components/Post.vue";
+import FormView from "./components/FormView.vue";
 
 import 'vue-good-table/dist/vue-good-table.css'
 import Noty from 'noty';
@@ -52,6 +53,11 @@ const routes = [{
     name: 'post',
     path: '/post',
     component: Post,
+  },
+  {
+    name: 'formView',
+    path: '/form-view',
+    component: FormView,
   },
 ];
 
