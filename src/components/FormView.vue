@@ -3,7 +3,7 @@
     <br>
     <div class="card">
         <div class="card-header">
-            Form view
+            Form view <span class="badge badge-info">Read-only</span>
         </div>
         <div class="card-body">
             <vue-bootstrap4-form-generator :model="model" :schema="schema" :defaults="defaults" />

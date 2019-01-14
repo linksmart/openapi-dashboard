@@ -13,11 +13,14 @@
                             <a v-if='props.row.method == "get" && IS_CRUDABLE(props.row.path,props.row.method)' href="#" @click.prevent='showSelectEntryPointModal(props.row.path,props.row.method)' data-toggle="tooltip" data-placement="top" title="CRUD" class="btn btn-sm btn-secondary btn-action">
                                 <i class="fas fa-table"></i>
                             </a>
-                            <a v-if='props.row.method == "get"' href="#" @click.prevent='handleFormView(props.row.path,props.row.method)' data-toggle="tooltip" data-placement="top" title="Form-view" class="btn btn-sm btn-secondary btn-action">
+                            <a v-if='props.row.method == "get"' href="" @click.prevent='handleFormView(props.row.path,props.row.method)' data-toggle="tooltip" data-placement="top" title="Form-view" class="btn btn-sm btn-secondary btn-action">
                                 <i class="fab fa-wpforms"></i>
                             </a>
-                            <a v-if='props.row.method == "post"' href="#" @click.prevent='initPost(props.row.path,props.row.method)' data-toggle="tooltip" data-placement="top" title="POST" class="btn btn-sm btn-primary btn-action">
+                            <a v-if='props.row.method == "post"' href="" @click.prevent='initPost(props.row.path,props.row.method)' data-toggle="tooltip" data-placement="top" title="Post" class="btn btn-sm btn-primary btn-action">
                                 <i class="fas fa-chevron-right"></i>
+                            </a>
+                            <a v-if='props.row.method == "delete"' href="" @click.prevent='handleDelete(props.row.path,props.row.method)' data-toggle="tooltip" data-placement="top" title="Delete" class="btn btn-sm btn-danger btn-action">
+                                <i class="fas fa-trash-alt"></i>
                             </a>
                         </div>
                     </span>
@@ -111,6 +114,18 @@
                 this.showModal = true;
             },
             handleFormView(path,method) {
+                this.parameters = this.getParametersByPathAndMethod(path,method);
+                if (this.parameters.length > 0) {
+                    this.selectedPath = path;
+                    this.selectedMethod = method;
+                    this.showFormViewModal = true;
+                } else{
+                    console.log("navigate to form view");
+                }
+                // this.response = this.getResponseByPathAndMethod(path,method);
+                // this.showFormViewModal = true;
+            },
+            handleDelete(path,method) {
                 this.parameters = this.getParametersByPathAndMethod(path,method);
                 if (this.parameters.length > 0) {
                     this.selectedPath = path;
