@@ -3,12 +3,11 @@
         <div class="card">
             <div class="card-body">
                 <Tag :tag="tag" />
-                <vue-good-table
-                :columns="columns"
-                :rows="rows">
+                <vue-bootstrap4-table :columns="columns"
+                                      :config="config"
+                                      :rows="rows">
 
-                <template slot="table-row" slot-scope="props">
-                    <span v-if="props.column.label == 'Actions'">
+                    <template slot="actions" slot-scope="props">
                         <div class="btn-group" role="group" aria-label="Actions">
                             <a v-if='props.row.method == "get" && IS_CRUDABLE(props.row.path,props.row.method)' href="#" @click.prevent='showSelectEntryPointModal(props.row.path,props.row.method)' data-toggle="tooltip" data-placement="top" title="CRUD" class="btn btn-sm btn-secondary btn-action">
                                 <i class="fas fa-table"></i>
@@ -23,14 +22,8 @@
                                 <i class="fas fa-trash-alt"></i>
                             </a>
                         </div>
-                    </span>
-
-                    <span v-else>
-                        {{props.formattedRow[props.column.field] }}
-                    </span>
-                </template>
-
-                </vue-good-table>
+                    </template>
+                </vue-bootstrap4-table>
 
                 <SelectEntryPointModal :table-index='propIndex'
                                        :show-modal='showModal'
@@ -87,6 +80,7 @@
     import SelectEntryPointModal from './modals/SelectEntryPointModal.vue';
     import FormViewParametersModal from './modals/FormViewParametersModal.vue';
     import DeleteModal from './modals/DeleteModal.vue';
+    import VueBootstrap4Table from 'vue-bootstrap4-table'
 
     const _ = require("lodash")
 
@@ -101,16 +95,21 @@
                 columns: [
                     {
                         label: 'Path',
-                        field: 'path',
+                        name: 'path',
+                        row_text_alignment:  "text-left",
+                        column_text_alignment:  "text-left",
                     },
                     {
                         label: 'Method',
-                        field: 'method',
+                        name: 'method',
+                        row_text_alignment:  "text-left",
+                        column_text_alignment:  "text-left",
                     },
                     {
                         label: 'Actions',
-                        field: 'btn',
-                        sortable: false,
+                        name: 'actions',
+                        row_text_alignment:  "text-left",
+                        column_text_alignment:  "text-left",
                     },
                 ],
                 rows: [],
@@ -120,7 +119,19 @@
                 selectedPath: '',
                 selectedMethod: '',
                 deleteSuccess:"",
-                deleteError:""
+                deleteError:"",
+                config: {
+                    global_search: {
+                        visibility: false,
+                    },
+                    checkbox_rows: true,
+                    rows_selectable: true,
+                    card_mode: false,
+                    pagination:false,
+                    pagination_info:false,
+                    show_refresh_button:false,
+                    show_reset_button:false
+                }
             }
         },
         mounted(){
@@ -131,6 +142,7 @@
             SelectEntryPointModal,
             FormViewParametersModal,
             DeleteModal,
+            VueBootstrap4Table
         },
         methods: {
             showSelectEntryPointModal(path,method) {
