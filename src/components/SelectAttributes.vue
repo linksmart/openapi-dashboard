@@ -13,7 +13,7 @@
         </div>
         <div class="col-md-6">
             <ul class="list-group">
-                <li v-for="(selected_attribute,key,index) in selectedAttributes" :key='index' class="list-group-item disabled">
+                <li v-for="(selected_attribute,key,index) in selectedAttributes" :key='index' class="list-group-item">
                     <div class="row">
                         <div class="col-md-1">
                             <div v-if='showCheckBox(selected_attribute)' class="Checkbox">
