@@ -55,6 +55,7 @@ export default {
             req_params_defaults: {},
             post_error: "",
             post_success: "",
+            test: {}
         }
     },
     mounted() {
@@ -63,10 +64,16 @@ export default {
         this.selectedPath = this.$route.params.selectedPath;
         this.request_parameters = this.$route.params.request_parameters;
         this.transfromToModel();
-        this.transformToSchema();
+        // this.transformToSchema();
         this.req_params_model = this.generateReqParamModel(this.request_parameters);
         this.generateReqParamSchema();
         this.req_params_defaults = _.cloneDeep(this.req_params_model);
+
+        // console.log(_.cloneDeep(this.schema));
+        // console.log(_.cloneDeep(this.test));
+        // console.log(_.isEqual(_.cloneDeep(this.schema),_.cloneDeep(this.schema)));
+
+
 
     },
     components: {
@@ -99,10 +106,11 @@ export default {
                         "pepper",
                         this.requestBody.content["application/json"].schema
                     );
-                    //    console.log(result[0]);
+                    //    console.log(result);
 
                     self.model = _.cloneDeep(result[0].pepper);
                     self.defaults = _.cloneDeep(result[0].pepper);
+                    self.schema = _.cloneDeep(result[1].pepper);
                     // self.schema = self.makeSchema(_.cloneDeep(result[0]));
                 } else if (
                     this.requestBody.content["application/json"].schema.type == "array"
@@ -111,18 +119,18 @@ export default {
                         "pepper",
                         this.requestBody.content["application/json"].schema
                     );
-                    // console.log(result[0]);
+                    //    console.log(result);
+
                     self.model = _.cloneDeep(result[0].pepper);
                     self.defaults = _.cloneDeep(result[0].pepper);
-                    // self.schema = self.makeSchema(_.cloneDeep(result[0]));
-                    // self.schema.fields.push(_.cloneDeep(result[1]));
+                    self.schema = _.cloneDeep(result[1].pepper);
                 }
             } else {
                 console.log("json schema not found");
             }
         },
         transformToSchema() {
-            this.schema = this.makeSchema(null, this.model);
+            this.schema = this.makeSchema("pepper", this.model);
         },
         makeSchema(key, value) {
 
@@ -187,53 +195,132 @@ export default {
             if (pepper.type == "object") {
                 let obj = {};
                 obj[salt] = {};
+                let schemaObj = {};
+                schemaObj[salt] = {
+                    type: "Object",
+                    name: salt,
+                    canRemove: true,
+                    canDuplicate: true,
+                    canAddProperty: true,
+                    elements: []
+                }
+
                 _.forEach(pepper.properties, function (value, key) {
                     if (value.type == "object" || value.type == "array") {
                         let result = self.makeModel(key, value);
                         obj[salt][key] = result[0][key];
+                        schemaObj[salt].elements.push(result[1][key]);
                     } else {
                         let result = self.makeModel(key, value);
                         obj[salt][key] = result[0];
+                        schemaObj[salt].elements.push(result[1]);
                     }
                 });
 
-                return [obj];
+                return [obj,schemaObj];
             }
 
             if (pepper.type == "string") {
-                return [""];
+                let element = {
+                    label: salt,
+                    name: salt,
+                    element_type: "input",
+                    type: "text",
+                    placeholder: ("Enter " + salt)
+                };
+                return ["",element];
             }
 
             if (pepper.type == "integer" || pepper.type == "number") {
-                return [0];
+                let element = {
+                    label: salt,
+                    name: salt,
+                    element_type: "input",
+                    type: "number",
+                    placeholder: ("Enter " + salt)
+                };
+                return [0,element];
             }
 
             if (pepper.type == "boolean") {
-                return [false];
+                let element = {
+                    label: salt,
+                    name: salt,
+                    element_type: "input",
+                    type: "checkbox",
+                    placeholder: ""
+                };
+                return [false,element];
             }
 
             if (pepper.type == "array") {
+                let arraySchemaobj = {
+                    type: "Array",
+                    name: salt,
+                    canAdd: true,
+                    canRemove: true,
+                    schema: {}
+                }
                 if (pepper.items.type == "object") {
                     let obj = {};
+                    let schemaObj = {
+                        type: "Object",
+                        name: salt,
+                        canRemove: true,
+                        canDuplicate: true,
+                        canAddProperty: true,
+                        elements: []
+                    }
                     _.forEach(pepper.items.properties, function (value, key) {
                         let result = self.makeModel(key, value);
                         obj[key] = result[0];
+                        schemaObj.elements.push(result[1]);
                     });
-
+                    arraySchemaobj.schema = schemaObj;
                     return [{
                         [salt]: [obj]
+                    },{
+                        [salt]: arraySchemaobj
                     }];
                 } else if (pepper.items.type == "string") {
+                    let element = {
+                        label: salt,
+                        name: salt,
+                        element_type: "input",
+                        type: "text",
+                        placeholder: ("Enter " + salt)
+                    };
+                    arraySchemaobj.schema.type = "input";
+                    arraySchemaobj.schema.element = element;
                     return [
-                        [""]
+                        [""],arraySchemaobj
                     ];
                 } else if (pepper.items.type == "integer" || pepper.type == "number") {
+                    let element = {
+                        label: salt,
+                        name: salt,
+                        element_type: "input",
+                        type: "number",
+                        placeholder: ("Enter " + salt)
+                    };
+                    arraySchemaobj.schema.type = "input";
+                    arraySchemaobj.schema.element = element;
                     return [
-                        [0]
+                        [0],arraySchemaobj
                     ];
                 } else if (pepper.type == "boolean") {
+                    let element = {
+                        label: salt,
+                        name: salt,
+                        element_type: "input",
+                        type: "checkbox",
+                        placeholder: ""
+                    };
+                    arraySchemaobj.schema.type = "input";
+                    arraySchemaobj.schema.element = element;
                     return [
-                        [false]
+                        [false],
+                        arraySchemaobj
                     ];
                 }
             }

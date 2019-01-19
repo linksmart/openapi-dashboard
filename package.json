@@ -5,7 +5,7 @@
   "author": "Rubanraj Ravichandran",
   "private": true,
   "scripts": {
-    "dev": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",
+    "watch": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",
     "start": "npm run dev",
     "build": "node build/build.js"
   },
@@ -37,7 +37,7 @@
     "vfg-field-object": "0.0.0-development",
     "vue": "^2.5.17",
     "vue-bootstrap4-form-generator": "^1.0.4",
-    "vue-bootstrap4-table": "^1.0.17",
+    "vue-bootstrap4-table": "^1.0.20",
     "vue-form-generator": "^2.3.2",
     "vue-good-table": "^2.16.0",
     "vue-json-pretty": "^1.4.1",
