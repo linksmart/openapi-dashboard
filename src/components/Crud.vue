@@ -15,7 +15,9 @@
                                       :config="config"
                                       :rows="rows"
                                       :actions="actions"
-                                      @on-update-columns="showModal = true">
+                                      @on-update-columns="showModal = true"
+                                      @on-change-query="onChangeQuery"
+                                      :totalRows="totalRows">
                 </vue-bootstrap4-table>
 
                 <SelectAttributesModal :show-modal='showModal' :selected-attributes='selected_attributes' :entry-data-properties='entry_data_properties' @closeModal="showModal=false" @updateAttributes="updateAttributes"/>
@@ -29,7 +31,6 @@
 import axios from 'axios';
 import { mapMutations,mapGetters } from 'vuex';
 var URI = require('urijs');
-var URITemplate = require('urijs/src/URITemplate');
 import VueBootstrap4Table from 'vue-bootstrap4-table'
 import SelectAttributesModal from './modals/SelectAttributesModal.vue';
 
@@ -42,9 +43,11 @@ var _ = {
 export default {
     data: function () {
         return {
-            url:'http://localhost:3000/assets/json/openapi.json',
             method:"",
             fullUrl:"",
+            url:"",
+            uriParams: {},
+            requestQueryParams: {},
             entry_data_path:"",
             selected_attributes: this.$route.params.selected_attributes,
             entry_data_properties: this.$route.params.entry_data_properties,
@@ -54,17 +57,26 @@ export default {
             data: [],
             showModal: false,
             config: {
+                pagination:true,
                 global_search: {
                     visibility: false,
                 },
+                per_page: 5,
                 checkbox_rows: false,
                 rows_selectable: false,
                 card_mode: false,
-                pagination:false,
-                pagination_info:false,
                 show_refresh_button:false,
                 show_reset_button:false,
+                server_mode:true
             },
+            queryParams: {
+                sort: [],
+                filters: [],
+                global_search: "",
+                per_page: 10,
+                page: 1,
+            },
+            totalRows:0,
             actions: [
                 {
                     btn_text: "Update Columns",
@@ -88,17 +100,28 @@ export default {
     mounted(){
         this.method = this.$route.params.method;
         this.fullUrl = this.$route.params.fullUrl;
+        this.url = this.$route.params.url;
         this.entry_data_path = this.$route.params.entry_data_path;
-        this.getData();
+        this.requestQueryParams = this.$route.params.queryParams;
+        this.uriParams = this.$route.params.uriParams;
+        if (this.requestQueryParams.per_page) {
+            // this.config.per_page = this.requestQueryParams.per_page;
+            // this.config.page = this.requestQueryParams.page;
+        }
+        console.log('mounted');
+
+        this.getData(this.fullUrl);
         this.generateColumns();
         this.generateRows();
     },
     methods: {
-        getData() {
+        getData(url) {
+            console.log(url);
             let self = this;
-            axios.get(this.fullUrl)
+            axios.get(url)
             .then(function (response) {
                 self.data = _.get(response,"data."+self.entry_data_path);
+                self.totalRows = response.data.total;
                 self.generateRows(self.data);
             });
         },
@@ -114,6 +137,21 @@ export default {
                 });
             });
             this.columns = columns ;
+        },
+        onChangeQuery(queryParams) {
+            this.queryParams = queryParams;
+            let paginationQuery = {
+                'page': queryParams.page,
+                'per_page': queryParams.per_page,
+            };
+        console.log('change');
+
+            if ((this.url == "" && this.fullUrl == "")) {
+                return;
+            }
+
+            let fullPath = new URI(this.url).addQuery(paginationQuery).toString();
+            this.getData(fullPath);
         },
         generateRows(data) {
             let rows = [];

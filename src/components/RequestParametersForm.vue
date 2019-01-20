@@ -107,34 +107,43 @@
         },
         computed: {
             fullUrl() {
-                let uriParams = {};
-                let queryParams = {};
-                let uriPath = '';
+                let uriPath = "";
                 let fullPath = "";
-            console.log(this.parameters);
 
-                this.parameters.forEach((param,key) => {
-                    if (param.in === 'path') {
-                        uriParams[param.name] = this.req_params_model[param.name];
-                    } else if (param.in === 'query') {
-                        queryParams[param.name] = this.req_params_model[param.name];
-                    }
-                });
-
-                if (!_.isEmpty(uriParams)) {
-                    uriPath = URITemplate(this.path).expand(uriParams);
+                if (!_.isEmpty(this.uriParams)) {
+                    uriPath = URITemplate(this.path).expand(this.uriParams);
                 }
 
                 if (_.isEmpty(uriPath)) {
-                    fullPath = this.serverUrl+this.path;
+                    fullPath = this.url;
                 } else {
                     fullPath = this.serverUrl+uriPath;
                 }
 
-                fullPath = new URI(fullPath).addQuery(queryParams).toString();
-                return fullPath
-
-            }
+                fullPath = new URI(fullPath).addQuery(this.queryParams).toString();
+                return fullPath;
+            },
+            url() {
+                return this.serverUrl + this.path;
+            },
+            uriParams() {
+                let uriParams = {};
+                this.parameters.forEach((param,key) => {
+                    if (param.in === 'path') {
+                        uriParams[param.name] = this.req_params_model[param.name];
+                    }
+                });
+                return uriParams;
+            },
+            queryParams() {
+                let queryParams = {};
+                this.parameters.forEach((param,key) => {
+                    if (param.in === 'query') {
+                        queryParams[param.name] = this.req_params_model[param.name];
+                    }
+                });
+                return queryParams;
+            },
         },
         watch: {
             parameters: {
@@ -146,7 +155,14 @@
                 deep: true
             },
             fullUrl(newval,oldVal) {
-                this.$emit("update:fullUrl", this.fullUrl);
+                // this.$emit("update:fullUrl", this.fullUrl);
+                // this.$emit("update:url", this.url);
+                this.$emit("on-query-params-change", {
+                    fullUrl : this.fullUrl,
+                    url : this.url,
+                    uriParams : _.cloneDeep(this.uriParams),
+                    queryParams : _.cloneDeep(this.queryParams)
+                });
             }
         }
     }

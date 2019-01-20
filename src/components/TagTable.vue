@@ -201,6 +201,8 @@
                     });
             },
             startCrud(payload) {
+                // console.log(payload);
+
                 this.showModal = false;
                 // next tick wait until the current DOM updates and then exeutes the function
                 this.$nextTick(function () {

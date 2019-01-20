@@ -45,7 +45,7 @@
                                     <request-parameters-form :parameters="parameters"
                                                                 :server-url="serverUrl"
                                                                 :path="path"
-                                                                :fullUrl.sync="fullUrl" />
+                                                                @on-query-params-change="handleQueryParamsChange"/>
                                     <!-- <vue-form-generator :schema="schema" :model="model" :options="formOptions" @validated="onValidated"></vue-form-generator> -->
                                 </div>
                             </div>
@@ -112,6 +112,9 @@
                 is_first_tab: true,
                 is_last_tab: false,
                 fullUrl: "",
+                url: "",
+                uriParams: {},
+                queryParams: {}
             }
         },
         mounted(){
@@ -243,6 +246,9 @@
                     selected_attributes: this.selected_attributes,
                     entry_data_properties: this.entry_data_properties,
                     fullUrl: this.fullUrl,
+                    url: this.url,
+                    queryParams: this.queryParams,
+                    uriParams: this.uriParams,
                     method: this.method,
                     entry_data_path: this.clean_data_entry_path,
                     request_params: this.model
@@ -265,8 +271,13 @@
                 } else {
                     return path;
                 }
+            },
+            handleQueryParamsChange(payload) {
+                this.fullUrl = payload.fullUrl
+                this.url = payload.url
+                this.uriParams = payload.uriParams
+                this.queryParams = payload.queryParams
             }
-
         },
         computed: {
             isValidEntryData() {
