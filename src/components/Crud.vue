@@ -44,7 +44,7 @@ export default {
         return {
             url:'http://localhost:3000/assets/json/openapi.json',
             method:"",
-            path:"",
+            fullUrl:"",
             entry_data_path:"",
             selected_attributes: this.$route.params.selected_attributes,
             entry_data_properties: this.$route.params.entry_data_properties,
@@ -57,13 +57,13 @@ export default {
                 global_search: {
                     visibility: false,
                 },
-                checkbox_rows: true,
-                rows_selectable: true,
+                checkbox_rows: false,
+                rows_selectable: false,
                 card_mode: false,
                 pagination:false,
                 pagination_info:false,
                 show_refresh_button:false,
-                show_reset_button:false
+                show_reset_button:false,
             },
             actions: [
                 {
@@ -87,7 +87,7 @@ export default {
     },
     mounted(){
         this.method = this.$route.params.method;
-        this.path = this.$route.params.path;
+        this.fullUrl = this.$route.params.fullUrl;
         this.entry_data_path = this.$route.params.entry_data_path;
         this.getData();
         this.generateColumns();
@@ -138,28 +138,7 @@ export default {
     computed: {
         ...mapGetters([
         'SERVER_URL',
-        ]),
-        fullUrl() {
-            let params = {};
-            let uriPath = '';
-
-            _.forEach(this.request_params,function(param,key) {
-                if (param.type === 'path') {
-                    params[key] = param.value;
-                }
-            });
-
-            if (!_.isEmpty(params)) {
-                uriPath = URITemplate(this.path).expand(params);
-            }
-
-            if (_.isEmpty(uriPath)) {
-                return this.SERVER_URL+this.path;
-            } else {
-                return this.SERVER_URL+uriPath;
-            }
-
-        }
+        ])
     }
 }
 </script>

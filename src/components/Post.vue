@@ -21,7 +21,7 @@
             <br>
             <button type="button" class="btn btn-primary" @click="postForm">Post</button>
         </div>
-        <div class="card-footer">
+        <div class="card-footer" v-show=' post_error !== "" || post_success !== ""'>
             <div v-if='post_error !== ""' class="alert alert-danger" role="alert">
                 <strong>{{post_error}}</strong>
             </div>
@@ -85,12 +85,18 @@ export default {
             self.post_error = "";
             axios.post(this.fullUrl, this.model)
             .then(function (response) {
-                if (response.status == 202 || response.status == 200) {
+                if (response.status >= 200 && response.status < 230) {
                     self.showSuccess("Successful")
+                    if (response.data && !_.isEmpty(response.data)) {
+                        self.post_success = response.data;
+                    } else {
+                        self.post_success = "Successful";
+                    }
+                    self.post_error = "";
                 }
-
             })
             .catch(function (error) {
+                self.post_success = "";
                 self.post_error = error.response.data.message;
             })
 
@@ -224,6 +230,8 @@ export default {
                 let element = {
                     label: salt,
                     name: salt,
+                    canRemove: true,
+                    readonly : pepper.readOnly,
                     element_type: "input",
                     type: "text",
                     placeholder: ("Enter " + salt)
@@ -235,6 +243,7 @@ export default {
                 let element = {
                     label: salt,
                     name: salt,
+                    canRemove: true,
                     element_type: "input",
                     type: "number",
                     placeholder: ("Enter " + salt)
@@ -246,6 +255,7 @@ export default {
                 let element = {
                     label: salt,
                     name: salt,
+                    canRemove: true,
                     element_type: "input",
                     type: "checkbox",
                     placeholder: ""
@@ -285,6 +295,7 @@ export default {
                 } else if (pepper.items.type == "string") {
                     let element = {
                         label: salt,
+                        canRemove: true,
                         name: salt,
                         element_type: "input",
                         type: "text",
@@ -299,6 +310,7 @@ export default {
                     let element = {
                         label: salt,
                         name: salt,
+                        canRemove: true,
                         element_type: "input",
                         type: "number",
                         placeholder: ("Enter " + salt)
@@ -312,6 +324,7 @@ export default {
                     let element = {
                         label: salt,
                         name: salt,
+                        canRemove: true,
                         element_type: "input",
                         type: "checkbox",
                         placeholder: ""

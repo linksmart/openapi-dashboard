@@ -29,6 +29,7 @@
                                        :show-modal='showModal'
                                        :response='response'
                                        :parameters="parameters"
+                                       :server-url="SERVER_URL"
                                        :path='selectedPath'
                                        :method='selectedMethod'
                                        @closeModal="showModal=false"
@@ -124,8 +125,8 @@
                     global_search: {
                         visibility: false,
                     },
-                    checkbox_rows: true,
-                    rows_selectable: true,
+                    checkbox_rows: false,
+                    rows_selectable: false,
                     card_mode: false,
                     pagination:false,
                     pagination_info:false,

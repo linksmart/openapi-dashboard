@@ -42,7 +42,11 @@
                         <div class="tab-pane fade" :id="'pills-request-params-'+tableIndex" role="tabpanel" :aria-labelledby="'request-params-'+tableIndex">
                             <div class="row">
                                 <div class="col-md-6">
-                                    <vue-form-generator :schema="schema" :model="model" :options="formOptions" @validated="onValidated"></vue-form-generator>
+                                    <request-parameters-form :parameters="parameters"
+                                                                :server-url="serverUrl"
+                                                                :path="path"
+                                                                :fullUrl.sync="fullUrl" />
+                                    <!-- <vue-form-generator :schema="schema" :model="model" :options="formOptions" @validated="onValidated"></vue-form-generator> -->
                                 </div>
                             </div>
                             <br>
@@ -70,6 +74,8 @@
     import VueJsonPretty from 'vue-json-pretty';
     import VueFormGenerator from "vue-form-generator";
     import SelectAttributes from '../SelectAttributes.vue';
+    import RequestParametersForm from '../RequestParametersForm.vue';
+
     var _ = {
         isEmpty: require('lodash/isEmpty'),
         find: require('lodash/find'),
@@ -80,7 +86,7 @@
         includes: require('lodash/includes'),
     };
     export default {
-        props: ['showModal','response','path','method','tableIndex','parameters'],
+        props: ['showModal','response','path','method','tableIndex','parameters','serverUrl'],
         data: function () {
             return {
                 json_path:'',
@@ -105,6 +111,7 @@
                 parameter_form_invalid: false,
                 is_first_tab: true,
                 is_last_tab: false,
+                fullUrl: "",
             }
         },
         mounted(){
@@ -131,7 +138,8 @@
         components: {
             VueJsonPretty,
             "vue-form-generator": VueFormGenerator.component,
-            SelectAttributes
+            SelectAttributes,
+            RequestParametersForm
         },
         methods: {
             onValidated(isValid, errors) {
@@ -234,7 +242,7 @@
                 this.$emit('startCrud',{
                     selected_attributes: this.selected_attributes,
                     entry_data_properties: this.entry_data_properties,
-                    path: this.path,
+                    fullUrl: this.fullUrl,
                     method: this.method,
                     entry_data_path: this.clean_data_entry_path,
                     request_params: this.model

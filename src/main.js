@@ -34,66 +34,74 @@ Vue.use(VueFormGenerator);
 Vue.use(ModuleLibrary);
 Vue.use(ModuleLibraryObject);
 
-const routes = [{
-    name: 'dashboard',
-    path: '/dashboard',
-    component: Dashboard,
-  },
-  {
-    name: 'explorer',
-    path: '/explorer',
-    component: Explorer,
-  },
-  {
-    name: 'crud',
-    path: '/crud',
-    component: Crud,
-  },
-  {
-    name: 'post',
-    path: '/post',
-    component: Post,
-  },
-  {
-    name: 'formView',
-    path: '/form-view',
-    component: FormView,
-  },
+const routes = [
+    {
+        name: 'root',
+        path: '/',
+        redirect: {
+            name : 'dashboard'
+        },
+    },
+    {
+        name: 'dashboard',
+        path: '/dashboard',
+        component: Dashboard,
+    },
+    {
+        name: 'explorer',
+        path: '/explorer',
+        component: Explorer,
+    },
+    {
+        name: 'crud',
+        path: '/crud',
+        component: Crud,
+    },
+    {
+        name: 'post',
+        path: '/post',
+        component: Post,
+    },
+    {
+        name: 'formView',
+        path: '/form-view',
+        component: FormView,
+    },
 ];
 
 // define a mixin object
 var myMixin = {
-  methods: {
-    showError(msg, timeout = 2500) {
-      new Noty({
-        type: 'error',
-        text: msg,
-        timeout: timeout
-      }).show();
-    },
-    showSuccess(msg, timeout = 2500) {
-      new Noty({
-        type: 'success',
-        text: msg,
-        timeout: timeout
-      }).show();
-    },
-  }
+    methods: {
+        showError(msg, timeout = 2500) {
+            new Noty({
+                type: 'error',
+                text: msg,
+                timeout: timeout
+            }).show();
+        },
+        showSuccess(msg, timeout = 2500) {
+            new Noty({
+                type: 'success',
+                text: msg,
+                timeout: timeout
+            }).show();
+        },
+    }
 }
 
 Vue.mixin(myMixin);
 
 const router = new VueRouter({
-  routes,
-  mode: 'history'
+    routes,
+    mode: 'history'
 });
 
 new Vue({
-  el: '#app',
-  router,
-  store,
-  data: {
-    test : 'ddd'
-  },
-  mounted() {}
+    el: '#app',
+    router,
+    store,
+    data: {
+        test: 'ddd'
+    },
+    mounted() {}
 })

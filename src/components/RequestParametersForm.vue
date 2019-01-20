@@ -111,6 +111,7 @@
                 let queryParams = {};
                 let uriPath = '';
                 let fullPath = "";
+            console.log(this.parameters);
 
                 this.parameters.forEach((param,key) => {
                     if (param.in === 'path') {
