@@ -6,14 +6,20 @@
 
 
 <script>
-
+    var _ = {
+        find: require('lodash/find'),
+        forEach: require('lodash/forEach'),
+        isEmpty: require('lodash/isEmpty'),
+        includes: require('lodash/includes'),
+        cloneDeep: require('lodash/cloneDeep')
+    };
     import VueBootstrap4FormGenerator from "vue-bootstrap4-form-generator"
     var URI = require('urijs');
     var URITemplate = require('urijs/src/URITemplate');
 
     export default {
         name: "RequestParametersForm",
-        props: ['serverUrl','path','parameters'],
+        props: ['serverUrl','path','parameters',"prefils"],
         data: function () {
             return {
                 req_params_model: {},
@@ -38,11 +44,18 @@
                 let model = {};
                 let self = this;
                 let allowed_params = ["path","query"];
-                _.forEach(parameters,function(parameter,key){
+                _.forEach(parameters,(parameter,key) => {
                     if (!_.includes(allowed_params,parameter.in)) {
                         return;
                     }
-                    model[parameter.name] = "";
+                    let value = "";
+                    if (this.prefils && this.prefils.length > 0) {
+                        let prefil = _.find(this.prefils,{name:parameter.name});
+                        if (prefil) {
+                            value = prefil.value;
+                        }
+                    }
+                    model[parameter.name] = value;
                 });
                 return model;
             },
@@ -147,6 +160,14 @@
         },
         watch: {
             parameters: {
+                handler: function(newValue) {
+                    this.req_params_model = this.generateReqParamModel(this.parameters);
+                    this.req_params_schema = this.makeSchema(null,this.req_params_model);
+                    this.req_params_defaults = _.cloneDeep(this.req_params_model);
+                },
+                deep: true
+            },
+            prefils: {
                 handler: function(newValue) {
                     this.req_params_model = this.generateReqParamModel(this.parameters);
                     this.req_params_schema = this.makeSchema(null,this.req_params_model);

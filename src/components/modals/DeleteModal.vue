@@ -13,7 +13,7 @@
                         <request-parameters-form :parameters="parameters"
                                                  :server-url="serverUrl"
                                                  :path="path"
-                                                 :fullUrl.sync="fullUrl"
+                                                 :prefils="prefils"
                                                  @on-request-params-change="handleRequestParamsChange" />
 
                     </div>
@@ -33,7 +33,7 @@
 
     export default {
         name: "DeleteModal",
-        props: ['showModal','serverUrl','path','method','tableIndex','parameters'],
+        props: ['showModal','serverUrl','path','method','tableIndex','parameters',"prefils"],
         data: function () {
             return {
                 fullUrl: "",

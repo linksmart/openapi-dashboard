@@ -1,18 +1,52 @@
 <template >
     <div class="container-fluid">
         <div class="card">
-                <vue-bootstrap4-table :columns="columns"
-                                      :config="config"
-                                      :rows="rows"
-                                      :actions="actions"
-                                      @on-update-columns="showModal = true"
-                                      @on-change-query="onChangeQuery"
-                                      :totalRows="totalRows">
-                </vue-bootstrap4-table>
+            <div class="card-body">
+                    <vue-bootstrap4-table :columns="columns"
+                                        :config="config"
+                                        :rows="rows"
+                                        :actions="actions"
+                                        @on-update-columns="showModal = true"
+                                        @on-change-query="onChangeQuery"
+                                        :totalRows="totalRows">
+                        <template slot="actions" slot-scope="props">
+                            <div class="btn-group" role="group" aria-label="Actions">
+                                <template v-if="canDelete">
+                                    <a v-for="(action,index) in deleteActions" :key="index" href="" @click.prevent='handleDelete(action,props.row)' data-toggle="tooltip" data-placement="top" title="Delete" class="btn btn-sm btn-danger btn-action">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </a>
+                                </template>
+                            </div>
+                        </template>
+                    </vue-bootstrap4-table>
 
-                <SelectAttributesModal :show-modal='showModal' :selected-attributes='selected_attributes' :entry-data-properties='entry_data_properties' @closeModal="showModal=false" @updateAttributes="updateAttributes"/>
+                    <SelectAttributesModal :show-modal='showModal' :selected-attributes='selected_attributes' :entry-data-properties='entry_data_properties' @closeModal="showModal=false" @updateAttributes="updateAttributes"/>
+
+                    <delete-modal :show-modal='showDeleteModal'
+                                    :path='selectedDeletePath'
+                                    :method='selectedDeleteMethod'
+                                    :server-url="SERVER_URL"
+                                    :parameters="deleteRequestParameters"
+                                    :prefils="deleteRequestParametersPrefiles"
+                                    @closeModal="showDeleteModal=false"
+                                    @trigger-delete="triggerDelete"/>
+            </div>
+            <div class="card-footer">
+                <div v-show='deleteSuccess!==""' class="alert alert-success" role="alert">
+                    <button type="button" class="close" aria-label="Close" @click="deleteSuccess=''">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <strong>Success!</strong> {{this.deleteSuccess}}
+                </div>
+                <div v-show='deleteError!==""' class="alert alert-danger" role="alert">
+                    <button type="button" class="close" aria-label="Close" @click="deleteError=''">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <strong>Oh snap!</strong> {{this.deleteError}}
+                </div>
             </div>
         </div>
+
     </div>
 </template>
 
@@ -23,6 +57,7 @@ import { mapMutations,mapGetters } from 'vuex';
 var URI = require('urijs');
 import VueBootstrap4Table from 'vue-bootstrap4-table'
 import SelectAttributesModal from './modals/SelectAttributesModal.vue';
+import DeleteModal from './modals/DeleteModal.vue';
 
 var _ = {
   forEach: require('lodash/forEach'),
@@ -30,6 +65,7 @@ var _ = {
   findIndex: require('lodash/findIndex'),
   find: require('lodash/find'),
   isEmpty: require('lodash/isEmpty'),
+  cloneDeep: require('lodash/cloneDeep'),
 };
 export default {
     data: function () {
@@ -75,11 +111,20 @@ export default {
                     event_name: "on-update-columns"
                 }
             ],
+            deleteActions : [],
+            deleteRequestParameters: [],
+            deleteRequestParametersPrefiles: [],
+            showDeleteModal: false,
+            selectedDeletePath: '',
+            selectedDeleteMethod: '',
+            deleteSuccess:"",
+            deleteError:"",
         }
     },
     components: {
         SelectAttributesModal,
-        VueBootstrap4Table
+        VueBootstrap4Table,
+        DeleteModal
     },
     mounted(){
         this.method = this.$route.params.payload.method;
@@ -89,6 +134,7 @@ export default {
         this.requestQueryParams = this.$route.params.payload.queryParams;
         this.uriParams = this.$route.params.payload.uriParams;
         this.paths = this.$route.params.paths;
+        this.generateDeleteActions();
         if (this.requestQueryParams.per_page) {
             // this.config.per_page = this.requestQueryParams.per_page;
             // this.config.page = this.requestQueryParams.page;
@@ -98,8 +144,55 @@ export default {
         this.generateRows();
     },
     methods: {
+        generateDeleteActions() {
+            this.deleteActions = [];
+            this.paths.forEach((path) => {
+                if (path.method == "delete") {
+                    let action = {
+                        "path" : path.path,
+                        "method" : path.method,
+                        "requestParameters" : _.cloneDeep(this.getParametersByPathAndMethod(path.path,path.method))
+                    }
+
+                    this.deleteActions.push(action);
+                }
+            });
+        },
+        handleDelete(action,row) {
+            this.deleteRequestParameters = action.requestParameters;
+            this.selectedDeletePath = action.path;
+            this.selectedDeleteMethod = action.method;
+            let rootAttribute = _.find(this.selected_attributes,{isRoot:true});
+            if (rootAttribute) {
+                let prefils = [{
+                    name: rootAttribute.name,
+                    value: _.get(row,rootAttribute.name)
+                }];
+                this.deleteRequestParametersPrefiles = prefils;
+            } else {
+                this.deleteRequestParametersPrefiles = [];
+            }
+            if (action.requestParameters.length > 0) {
+                this.showDeleteModal = true;
+            } else {
+                this.triggerDelete(this.SERVER_URL+path);
+            }
+        },
+        triggerDelete(url) {
+            this.showDeleteModal = false;
+            axios.delete(url)
+            .then((response) => {
+                this.deleteError = "";
+                this.deleteSuccess = JSON.stringify(response.data);
+                this.getData(this.fullUrl);
+            })
+            .catch((error) => {
+                this.deleteSuccess = "";
+                this.deleteError = JSON.stringify(error.response.data);
+            })
+
+        },
         getData(url) {
-            console.log(url);
             let self = this;
             axios.get(url)
             .then(function (response) {
@@ -119,6 +212,13 @@ export default {
                     column_text_alignment:  "text-left",
                 });
             });
+            let actionColumn = {
+                label:"Action",
+                name:"actions",
+                row_text_alignment:  "text-left",
+                column_text_alignment:  "text-left"
+            };
+            columns.push(actionColumn);
             this.columns = columns ;
         },
         onChangeQuery(queryParams) {
@@ -159,11 +259,20 @@ export default {
     computed: {
         ...mapGetters([
         'SERVER_URL',
+        'getParametersByPathAndMethod'
         ]),
         canDelete() {
             let path = _.find(this.paths, { 'method': "delete" });
-            let rootAttribute = _.find(this.selected_attributes, { 'isRoot': true });
-            return (path && rootAttribute) ? true : false;
+            // let rootAttribute = _.find(this.selected_attributes, { 'isRoot': true });
+            return (path) ? true : false;
+        }
+    },
+    watch: {
+        selected_attributes: {
+            handler: function(newValue) {
+                this.generateDeleteActions();
+            },
+            deep: true
         }
     }
 }
