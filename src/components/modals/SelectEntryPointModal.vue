@@ -12,13 +12,13 @@
                     <div class="modal-body">
                         <ul class="nav nav-pills mb-3" role="tablist" :id="'nav-tab-items-'+tableIndex">
                             <li class="nav-item">
-                                <a class="nav-link rounded-circle active" :id="'entry-path-selector-'+tableIndex" data-toggle="pill" :href="'#pills-entry-path-'+tableIndex" role="tab" :aria-controls="'pills-entry-path-'+tableIndex" aria-selected="true">1</a>
+                                <a class="nav-link rounded-circle" :id="'request-params-'+tableIndex" data-toggle="pill" :href="'#pills-request-params-'+tableIndex" role="tab" :aria-controls="'pills-request-params-'+tableIndex" aria-selected="false">1</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link rounded-circle" :class = "(isValidEntryData)?'':'disabled'" :id="'attribute-selector-'+tableIndex" data-toggle="pill" :href="'#pills-attribute-selector-'+tableIndex" role="tab" :aria-controls="'pills-attribute-selector-'+tableIndex" aria-selected="false">2</a>
+                                <a class="nav-link rounded-circle active" :id="'entry-path-selector-'+tableIndex" data-toggle="pill" :href="'#pills-entry-path-'+tableIndex" role="tab" :aria-controls="'pills-entry-path-'+tableIndex" aria-selected="true">2</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link rounded-circle" :class = "(isValidEntryData)?'':'disabled'" :id="'request-params-'+tableIndex" data-toggle="pill" :href="'#pills-request-params-'+tableIndex" role="tab" :aria-controls="'pills-request-params-'+tableIndex" aria-selected="false">3</a>
+                                <a class="nav-link rounded-circle" :class = "(isValidEntryData)?'':'disabled'" :id="'attribute-selector-'+tableIndex" data-toggle="pill" :href="'#pills-attribute-selector-'+tableIndex" role="tab" :aria-controls="'pills-attribute-selector-'+tableIndex" aria-selected="false">3</a>
                             </li>
                         </ul>
                         <div class="tab-content">
@@ -114,7 +114,9 @@
                 fullUrl: "",
                 url: "",
                 uriParams: {},
-                queryParams: {}
+                queryParams: {},
+                backUpPath: "",
+                backUpMethod: ""
             }
         },
         mounted(){
@@ -149,9 +151,7 @@
                 this.parameter_form_invalid = !isValid;
             },
             next(){
-                if (this.isValidEntryData) {
-                    $(`#nav-tab-items-${this.tableIndex} a.active`).parent().next('li').find('a').trigger('click');
-                }
+                $(`#nav-tab-items-${this.tableIndex} a.active`).parent().next('li').find('a').trigger('click');
             },
             previous(){
                 $(`#nav-tab-items-${this.tableIndex} a.active`).parent().prev('li').find('a').trigger('click');
@@ -261,7 +261,6 @@
                 this.entry_data_properties = {};
                 this.selected_attributes = [];
                 $('#nav-tab-items-'+ this.tableIndex + ' li:first-child a').tab('show');
-                this.$emit("clearParameters");
             },
             removeFirstDot(path) {
                 if (_.isEmpty(path)) {
@@ -293,17 +292,21 @@
         watch: {
             showModal: function (val) {
                 if (val) {
+                    if (this.backUpPath != this.path || this.backUpMethod != this.method) {
+                        console.log("resetting");
+                        this.resetData();
+                    }
                     this.response_content = this.response.content;
                     $(this.$refs.selectArrayModal).modal('show');
                 } else {
-                    this.resetData();
+                    this.backUpPath = this.path;
+                    this.backUpMethod = this.method;
                     $(this.$refs.selectArrayModal).modal('hide');
                 }
             },
             entry_data: {
                 handler: function(newValue) {
                     if (!this.isValidEntryData) {
-                        // this.entry_data_properties = this.entry_data.items.properties;
                         this.entry_data_properties = {}
                     } else {
                         this.entry_data_properties = this.entry_data.items.properties;

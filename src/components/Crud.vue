@@ -1,16 +1,6 @@
 <template >
     <div class="container-fluid">
         <div class="card">
-            <!-- <div class="card-body">
-                <vue-good-table
-                :columns="columns"
-                :rows="rows">
-
-                <div slot="table-actions">
-                    <button type="button" class="btn btn-primary mr-1" @click="showModal = true">Update attributes</button>
-                </div>
-
-                </vue-good-table> -->
                 <vue-bootstrap4-table :columns="columns"
                                       :config="config"
                                       :rows="rows"
@@ -38,6 +28,7 @@ var _ = {
   forEach: require('lodash/forEach'),
   get: require('lodash/get'),
   findIndex: require('lodash/findIndex'),
+  find: require('lodash/find'),
   isEmpty: require('lodash/isEmpty'),
 };
 export default {
@@ -49,12 +40,13 @@ export default {
             uriParams: {},
             requestQueryParams: {},
             entry_data_path:"",
-            selected_attributes: this.$route.params.selected_attributes,
-            entry_data_properties: this.$route.params.entry_data_properties,
-            request_params: this.$route.params.request_params,
+            selected_attributes: this.$route.params.payload.selected_attributes,
+            entry_data_properties: this.$route.params.payload.entry_data_properties,
+            request_params: this.$route.params.payload.request_params,
             rows: [],
             columns: [],
             data: [],
+            paths: [],
             showModal: false,
             config: {
                 pagination:true,
@@ -81,15 +73,7 @@ export default {
                 {
                     btn_text: "Update Columns",
                     event_name: "on-update-columns"
-                },
-                {
-                    btn_text: "Update Columns",
-                    event_name: "on-update-columns"
-                },
-                {
-                    btn_text: "Update Columns",
-                    event_name: "on-update-columns"
-                },
+                }
             ],
         }
     },
@@ -98,18 +82,17 @@ export default {
         VueBootstrap4Table
     },
     mounted(){
-        this.method = this.$route.params.method;
-        this.fullUrl = this.$route.params.fullUrl;
-        this.url = this.$route.params.url;
-        this.entry_data_path = this.$route.params.entry_data_path;
-        this.requestQueryParams = this.$route.params.queryParams;
-        this.uriParams = this.$route.params.uriParams;
+        this.method = this.$route.params.payload.method;
+        this.fullUrl = this.$route.params.payload.fullUrl;
+        this.url = this.$route.params.payload.url;
+        this.entry_data_path = this.$route.params.payload.entry_data_path;
+        this.requestQueryParams = this.$route.params.payload.queryParams;
+        this.uriParams = this.$route.params.payload.uriParams;
+        this.paths = this.$route.params.paths;
         if (this.requestQueryParams.per_page) {
             // this.config.per_page = this.requestQueryParams.per_page;
             // this.config.page = this.requestQueryParams.page;
         }
-        console.log('mounted');
-
         this.getData(this.fullUrl);
         this.generateColumns();
         this.generateRows();
@@ -176,7 +159,12 @@ export default {
     computed: {
         ...mapGetters([
         'SERVER_URL',
-        ])
+        ]),
+        canDelete() {
+            let path = _.find(this.paths, { 'method': "delete" });
+            let rootAttribute = _.find(this.selected_attributes, { 'isRoot': true });
+            return (path && rootAttribute) ? true : false;
+        }
     }
 }
 </script>

@@ -147,27 +147,33 @@
         },
         methods: {
             showSelectEntryPointModal(path,method) {
-                this.response = this.getResponseByPathAndMethod(path,method);
-                this.parameters = this.getParametersByPathAndMethod(path,method);
-                this.selectedPath = path;
-                this.selectedMethod = method;
+                if (this.selectedPath != path || this.selectedMethod != method) {
+                    this.response = this.getResponseByPathAndMethod(path,method);
+                    this.parameters = _.cloneDeep(this.getParametersByPathAndMethod(path,method));
+                    this.selectedPath = path;
+                    this.selectedMethod = method;
+                }
                 this.showModal = true;
             },
             handleFormView(path,method) {
-                this.parameters = this.getParametersByPathAndMethod(path,method);
-                if (this.parameters.length > 0) {
+                if (this.selectedPath != path || this.selectedMethod != method) {
+                    this.parameters = this.getParametersByPathAndMethod(path,method);
                     this.selectedPath = path;
                     this.selectedMethod = method;
+                }
+                if (this.parameters.length > 0) {
                     this.showFormViewModal = true;
                 } else{
-                    console.log("navigate to form view");
+                    this.goToFormView(this.SERVER_URL + path)
                 }
             },
             handleDelete(path,method) {
-                this.parameters = this.getParametersByPathAndMethod(path,method);
-                if (this.parameters.length > 0) {
+                if (this.selectedPath != path || this.selectedMethod != method) {
+                    this.parameters = this.getParametersByPathAndMethod(path,method);
                     this.selectedPath = path;
                     this.selectedMethod = method;
+                }
+                if (this.parameters.length > 0) {
                     this.showDeleteModal = true;
                 } else{
                     this.triggerDelete(this.SERVER_URL+path);
@@ -201,12 +207,13 @@
                     });
             },
             startCrud(payload) {
-                // console.log(payload);
-
                 this.showModal = false;
                 // next tick wait until the current DOM updates and then exeutes the function
                 this.$nextTick(function () {
-                    this.$router.push({ name: 'crud', params: payload});
+                    this.$router.push({ name: 'crud', params: {
+                        payload,
+                        paths: this.group.paths
+                        }});
                 });
             },
             goToFormView(url) {
