@@ -150,7 +150,7 @@ export default {
                 return;
             }
 
-            let fullPath = new URI(this.url).addQuery(paginationQuery).toString();
+            let fullPath = new URI(this.fullUrl).addQuery(paginationQuery).toString();
             this.getData(fullPath);
         },
         generateRows(data) {

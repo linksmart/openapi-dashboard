@@ -45,7 +45,7 @@
                                     <request-parameters-form :parameters="parameters"
                                                                 :server-url="serverUrl"
                                                                 :path="path"
-                                                                @on-query-params-change="handleQueryParamsChange"/>
+                                                                @on-request-params-change="handleRequestParamsChange"/>
                                     <!-- <vue-form-generator :schema="schema" :model="model" :options="formOptions" @validated="onValidated"></vue-form-generator> -->
                                 </div>
                             </div>
@@ -272,7 +272,7 @@
                     return path;
                 }
             },
-            handleQueryParamsChange(payload) {
+            handleRequestParamsChange(payload) {
                 this.fullUrl = payload.fullUrl
                 this.url = payload.url
                 this.uriParams = payload.uriParams

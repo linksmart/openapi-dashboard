@@ -157,7 +157,7 @@
             fullUrl(newval,oldVal) {
                 // this.$emit("update:fullUrl", this.fullUrl);
                 // this.$emit("update:url", this.url);
-                this.$emit("on-query-params-change", {
+                this.$emit("on-request-params-change", {
                     fullUrl : this.fullUrl,
                     url : this.url,
                     uriParams : _.cloneDeep(this.uriParams),

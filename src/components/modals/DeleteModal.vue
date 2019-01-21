@@ -13,7 +13,8 @@
                         <request-parameters-form :parameters="parameters"
                                                  :server-url="serverUrl"
                                                  :path="path"
-                                                 :fullUrl.sync="fullUrl" />
+                                                 :fullUrl.sync="fullUrl"
+                                                 @on-request-params-change="handleRequestParamsChange" />
 
                     </div>
                     <div class="modal-footer">
@@ -47,7 +48,9 @@
             RequestParametersForm
         },
         methods: {
-
+            handleRequestParamsChange(payload) {
+                this.fullUrl = payload.fullUrl
+            }
         },
         watch: {
             showModal: function (val) {
