@@ -136,6 +136,11 @@ export default {
         DeleteModal
     },
     mounted(){
+
+        if (this.$route.params.id >= this.getCrudTableViewStatesCount) {
+            this.$router.push({name: 'explore'});
+            return;
+        }
         let state = this.getCrudTableViewState(this.$route.params.id);
 
         let payload = state.payload;
