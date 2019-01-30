@@ -8,6 +8,8 @@ var _ = {
   has: require('lodash/has'),
   forEach: require('lodash/forEach'),
 };
+import createPersistedState from 'vuex-persistedstate';
+
 
 Vue.use(Vuex);
 
@@ -18,8 +20,9 @@ export default new Vuex.Store({
       config : {},
       serverUrl: "",
       swaggerConfigUrl: "",
-
+    //   crudTableViewStates
   },
+  plugins: [createPersistedState()],
   mutations: {
       setConfig: (state,config) => {
         Vue.set(state,'config',config)
@@ -38,6 +41,18 @@ export default new Vuex.Store({
 
   },
   getters: {
+    getConfig: (state,config) => {
+        Vue.set(state,'config',config)
+    },
+    getOriginalConfig: (state,config) => {
+        Vue.set(state,'original_config',config)
+    },
+    getServerUrl: (state,url) => {
+        Vue.set(state,'serverUrl',url)
+    },
+    getSwaggerConfigUrl: (state,url) => {
+        Vue.set(state,'swaggerConfigUrl',url)
+    },
 
     IS_CONFIG_EMPTY: state => {
       return _.isEmpty(state.config);

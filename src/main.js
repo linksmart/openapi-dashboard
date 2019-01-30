@@ -39,7 +39,7 @@ const routes = [
         name: 'root',
         path: '/',
         redirect: {
-            name : 'dashboard'
+            name : 'explorer'
         },
     },
     {
@@ -65,6 +65,11 @@ const routes = [
     {
         name: 'formView',
         path: '/form-view',
+        component: FormView,
+    },
+    {
+        name: 'putView',
+        path: '/put-view',
         component: FormView,
     },
 ];
