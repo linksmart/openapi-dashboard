@@ -7,6 +7,7 @@
                                         :rows="rows"
                                         :actions="actions"
                                         @on-update-columns="showModal = true"
+                                        @on-post="goToPost"
                                         @on-change-query="onChangeQuery"
                                         :totalRows="totalRows">
                         <template slot="actions" slot-scope="props">
@@ -113,6 +114,10 @@ export default {
                 {
                     btn_text: "Update Columns",
                     event_name: "on-update-columns"
+                },
+                {
+                    btn_text: "Post",
+                    event_name: "on-post"
                 }
             ],
             deleteActions : [],
@@ -161,6 +166,29 @@ export default {
                     this.deleteActions.push(action);
                 }
             });
+        },
+
+        goToPost() {
+            if (!this.canPost) {
+                console.log("missing post parameters");
+                return;
+            }
+            let post = _.find(this.paths, {"method":"post"});
+            let path = post.path;
+            let method = post.method;
+            let requestBody = this.getRequestByPathAndMethod(path,method);
+            let requestParameters = this.getParametersByPathAndMethod(path,method);
+
+            this.$router.push({
+                name: 'post',
+                params: {
+                    request_body : _.cloneDeep(requestBody),
+                    request_parameters : requestParameters,
+                    selectedPath : path,
+                    selectedMethod : method
+                    }
+                });
+
         },
         handleDelete(action,row) {
             this.deleteRequestParameters = action.requestParameters;
@@ -231,7 +259,6 @@ export default {
                 'page': queryParams.page,
                 'per_page': queryParams.per_page,
             };
-        console.log('change');
 
             if ((this.url == "" && this.fullUrl == "")) {
                 return;
@@ -263,7 +290,8 @@ export default {
     computed: {
         ...mapGetters([
         'SERVER_URL',
-        'getParametersByPathAndMethod'
+        'getParametersByPathAndMethod',
+        'getRequestByPathAndMethod'
         ]),
         canDelete() {
             let path = _.find(this.paths, { 'method': "delete" });
@@ -273,13 +301,16 @@ export default {
         hasId() {
             let flag = false;
             this.selected_attributes.some(selectedAttribute => {
-                console.log(selectedAttribute.name);
                 if (selectedAttribute.isRoot) {
                     flag = true;
                     return true;
                 }
             })
             return flag;
+        },
+        canPost() {
+            let index = _.findIndex(this.paths, { 'method': "post"});
+            return (index != -1)
         }
     },
     watch: {
@@ -288,6 +319,9 @@ export default {
                 this.generateDeleteActions();
             },
             deep: true
+        },
+        hasId(newValue,oldVal) {
+
         }
     }
 }
