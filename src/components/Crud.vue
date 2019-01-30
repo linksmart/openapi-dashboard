@@ -81,9 +81,9 @@ export default {
             uriParams: {},
             requestQueryParams: {},
             entry_data_path:"",
-            selected_attributes: this.$route.params.payload.selected_attributes,
-            entry_data_properties: this.$route.params.payload.entry_data_properties,
-            request_params: this.$route.params.payload.request_params,
+            selected_attributes: [],
+            entry_data_properties: {},
+            request_params: {},
             rows: [],
             columns: [],
             data: [],
@@ -136,23 +136,33 @@ export default {
         DeleteModal
     },
     mounted(){
-        this.method = this.$route.params.payload.method;
-        this.fullUrl = this.$route.params.payload.fullUrl;
-        this.url = this.$route.params.payload.url;
-        this.entry_data_path = this.$route.params.payload.entry_data_path;
-        this.requestQueryParams = this.$route.params.payload.queryParams;
-        this.uriParams = this.$route.params.payload.uriParams;
-        this.paths = this.$route.params.paths;
+        let state = this.getCrudTableViewState(this.$route.params.id);
+
+        let payload = state.payload;
+        this.method = payload.method;
+        this.fullUrl = payload.fullUrl;
+        this.url = payload.url;
+        this.entry_data_path = payload.entry_data_path;
+        this.requestQueryParams = payload.queryParams;
+        this.uriParams = payload.uriParams;
+        this.paths = state.paths;
+
+        this.selected_attributes = payload.selected_attributes;
+        this.entry_data_properties = payload.entry_data_properties;
+        this.request_params = payload.request_params;
         this.generateDeleteActions();
-        if (this.requestQueryParams.per_page) {
-            // this.config.per_page = this.requestQueryParams.per_page;
-            // this.config.page = this.requestQueryParams.page;
-        }
+        // if (this.requestQueryParams.per_page) {
+        //     // this.config.per_page = this.requestQueryParams.per_page;
+        //     // this.config.page = this.requestQueryParams.page;
+        // }
         this.getData(this.fullUrl);
         this.generateColumns();
         this.generateRows();
     },
     methods: {
+        ...mapMutations( [
+            'updateCrudTableViewStateSelectedAttributes'
+        ]),
         generateDeleteActions() {
             this.deleteActions = [];
             this.paths.forEach((path) => {
@@ -283,6 +293,7 @@ export default {
         },
         updateAttributes(selected_attributes) {
             this.selected_attributes = selected_attributes;
+            this.updateCrudTableViewStateSelectedAttributes({index : this.$route.params.id, selectedAttributes : selected_attributes});
             this.generateColumns();
             this.generateRows(this.data);
         }
@@ -291,7 +302,9 @@ export default {
         ...mapGetters([
         'SERVER_URL',
         'getParametersByPathAndMethod',
-        'getRequestByPathAndMethod'
+        'getRequestByPathAndMethod',
+        'getCrudTableViewState',
+        'getCrudTableViewStatesCount'
         ]),
         canDelete() {
             let path = _.find(this.paths, { 'method': "delete" });
@@ -321,6 +334,11 @@ export default {
             deep: true
         },
         hasId(newValue,oldVal) {
+
+        },
+        '$route' (to, from) {
+            // react to route changes...
+            console.log(to);
 
         }
     }

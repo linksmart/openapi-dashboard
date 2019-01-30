@@ -149,6 +149,11 @@
             VueBootstrap4Table
         },
         methods: {
+            ...mapMutations( [
+                'addCrudTableViewState',
+                'updateCrudTableViewState',
+                'removeCrudTableViewState',
+            ]),
             showSelectEntryPointModal(path,method) {
                 if (this.selectedPath != path || this.selectedMethod != method) {
                     this.response = this.getResponseByPathAndMethod(path,method);
@@ -222,13 +227,34 @@
                     });
             },
             startCrud(payload) {
+
+                let index = _.findIndex(this.getCrudTableViewStates, { 'path': this.selectedPath, 'method': this.selectedMethod });
+
+                if (index > -1) {
+                    this.updateCrudTableViewState({index: index,payload: payload});
+                } else {
+                    let state = {
+                        path: this.selectedPath,
+                        method: this.selectedMethod,
+                        payload: payload,
+                        paths: _.cloneDeep(this.group.paths)
+                    };
+                    this.addCrudTableViewState(state);
+                }
+
                 this.showModal = false;
+
+                // return;
                 // next tick wait until the current DOM updates and then exeutes the function
                 this.$nextTick(function () {
-                    this.$router.push({ name: 'crud', params: {
-                        payload,
-                        paths: this.group.paths
-                        }});
+                    if (index == -1) {
+                        index = this.getCrudTableViewStates.length - 1;
+                    }
+                    this.$router.push({ path: `/crud/${index}` })
+                    // this.$router.push({ name: 'crud', params: {
+                    //     payload,
+                    //     paths: this.group.paths
+                    //     }});
                 });
             },
             goToFormView(url) {
@@ -257,6 +283,7 @@
         computed: {
             ...mapGetters([
             "getTagByName",
+            "getCrudTableViewStates",
             "getResponseByPathAndMethod",
             "getParametersByPathAndMethod",
             "getRequestByPathAndMethod",

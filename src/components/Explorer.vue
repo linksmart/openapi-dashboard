@@ -50,10 +50,10 @@ export default {
     },
     methods: {
         ...mapMutations( [
-        'setConfig',
-        'setOriginalConfig',
-        'setServerUrl',
-        'setSwaggerConfigUrl',
+            'setConfig',
+            'setOriginalConfig',
+            'setServerUrl',
+            'setSwaggerConfigUrl',
         ]),
         fetchSwaggerJson(swaggerConfigUrl) {
 

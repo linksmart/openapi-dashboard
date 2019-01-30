@@ -20,7 +20,7 @@ export default new Vuex.Store({
       config : {},
       serverUrl: "",
       swaggerConfigUrl: "",
-    //   crudTableViewStates
+      crudTableViewStates: []
   },
   plugins: [createPersistedState()],
   mutations: {
@@ -36,26 +36,35 @@ export default new Vuex.Store({
       setSwaggerConfigUrl: (state,url) => {
         Vue.set(state,'swaggerConfigUrl',url)
     },
+    addCrudTableViewState: (state,crudTableViewState) => {
+        state.crudTableViewStates.push(crudTableViewState);
+    },
+    updateCrudTableViewState: (state,payload) => {
+        Vue.set(state.crudTableViewStates[payload.index],'payload',payload.payload)
+    },
+    updateCrudTableViewStateSelectedAttributes: (state,payload) => {
+        Vue.set(state.crudTableViewStates[payload.index].payload,'selected_attributes',payload.selectedAttributes)
+    },
+    removeCrudTableViewState: (state,index) => {
+        state.crudTableViewStates.splice(index,1);
+    },
   },
   actions: {
 
   },
   getters: {
-    getConfig: (state,config) => {
-        Vue.set(state,'config',config)
-    },
-    getOriginalConfig: (state,config) => {
-        Vue.set(state,'original_config',config)
-    },
-    getServerUrl: (state,url) => {
-        Vue.set(state,'serverUrl',url)
-    },
-    getSwaggerConfigUrl: (state,url) => {
-        Vue.set(state,'swaggerConfigUrl',url)
-    },
-
     IS_CONFIG_EMPTY: state => {
       return _.isEmpty(state.config);
+    },
+
+    getCrudTableViewStates: state => {
+        return state.crudTableViewStates;
+    },
+    getCrudTableViewStatesCount: state => {
+        return state.crudTableViewStates.length;
+    },
+    getCrudTableViewState: (state) => (index) => {
+        return state.crudTableViewStates[index];
     },
 
     INFO: state => {

@@ -103,7 +103,18 @@ export default {
                 $(this.$refs.selectAttributeModal).modal('hide');
             }
         },
-
+        entryDataProperties: {
+            handler: function(newValue) {
+                this.entry_data_properties = _.cloneDeep(newValue);
+            },
+            deep: true
+        },
+        selectedAttributes: {
+            handler: function(newValue) {
+                this.selected_attributes = _.cloneDeep(newValue);
+            },
+            deep: true
+        }
     }
 }
 
