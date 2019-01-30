@@ -36,7 +36,7 @@
     "vfg-field-array": "0.0.1",
     "vfg-field-object": "0.0.0-development",
     "vue": "^2.5.17",
-    "vue-bootstrap4-form-generator": "^1.0.4",
+    "vue-bootstrap4-form-generator": "^1.0.5",
     "vue-bootstrap4-table": "^1.0.20",
     "vue-form-generator": "^2.3.2",
     "vue-good-table": "^2.16.0",

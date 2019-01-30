@@ -64,17 +64,9 @@ export default {
         this.selectedPath = this.$route.params.selectedPath;
         this.request_parameters = this.$route.params.request_parameters;
         this.transfromToModel();
-        // this.transformToSchema();
         this.req_params_model = this.generateReqParamModel(this.request_parameters);
         this.generateReqParamSchema();
         this.req_params_defaults = _.cloneDeep(this.req_params_model);
-
-        // console.log(_.cloneDeep(this.schema));
-        // console.log(_.cloneDeep(this.test));
-        // console.log(_.isEqual(_.cloneDeep(this.schema),_.cloneDeep(this.schema)));
-
-
-
     },
     components: {
         VueBootstrap4FormGenerator
@@ -117,7 +109,6 @@ export default {
                     self.model = _.cloneDeep(result[0].pepper);
                     self.defaults = _.cloneDeep(result[0].pepper);
                     self.schema = _.cloneDeep(result[1].pepper);
-                    // self.schema = self.makeSchema(_.cloneDeep(result[0]));
                 } else if (
                     this.requestBody.content["application/json"].schema.type == "array"
                 ) {
@@ -134,9 +125,6 @@ export default {
             } else {
                 console.log("json schema not found");
             }
-        },
-        transformToSchema() {
-            this.schema = this.makeSchema("pepper", this.model);
         },
         makeSchema(key, value) {
 

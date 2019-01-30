@@ -37,10 +37,6 @@ export default {
     },
     mounted() {
         this.url = this.$route.params.url;
-        // this.selectedMethod = this.$route.params.selectedMethod;
-        // this.selectedPath = this.$route.params.selectedPath;
-        // this.request_parameters = this.$route.params.request_parameters;
-        // this.transfromToModel();
         axios.get(this.url)
         .then((response) => {
             this.model = response.data;
@@ -49,8 +45,6 @@ export default {
         })
         .catch((error) => {
         })
-        // this.req_params_model = this.generateReqParamModel(this.request_parameters);
-        // this.generateReqParamSchema();
 
     },
     components: {

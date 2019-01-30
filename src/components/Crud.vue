@@ -12,9 +12,9 @@
                         <template slot="actions" slot-scope="props">
                             <div class="btn-group" role="group" aria-label="Actions">
                                 <template v-if="canDelete">
-                                    <a v-for="(action,index) in deleteActions" :key="index" href="" @click.prevent='handleDelete(action,props.row)' data-toggle="tooltip" data-placement="top" title="Delete" class="btn btn-sm btn-danger btn-action">
+                                    <button v-for="(action,index) in deleteActions" :disabled="!hasId" :key="index" @click.prevent='handleDelete(action,props.row)' data-toggle="tooltip" data-placement="top" title="Delete" class="btn btn-sm btn-danger btn-action">
                                         <i class="fas fa-trash-alt"></i>
-                                    </a>
+                                    </button>
                                 </template>
                             </div>
                         </template>
@@ -30,8 +30,12 @@
                                     :prefils="deleteRequestParametersPrefiles"
                                     @closeModal="showDeleteModal=false"
                                     @trigger-delete="triggerDelete"/>
+
+                <small class="form-text text-danger" v-if="!hasId">
+                    * Select an unique identifier to do CRUD operations
+                </small>
             </div>
-            <div class="card-footer">
+            <div v-show='deleteError!=="" || deleteSuccess!==""' class="card-footer">
                 <div v-show='deleteSuccess!==""' class="alert alert-success" role="alert">
                     <button type="button" class="close" aria-label="Close" @click="deleteSuccess=''">
                         <span aria-hidden="true">&times;</span>
@@ -265,6 +269,17 @@ export default {
             let path = _.find(this.paths, { 'method': "delete" });
             // let rootAttribute = _.find(this.selected_attributes, { 'isRoot': true });
             return (path) ? true : false;
+        },
+        hasId() {
+            let flag = false;
+            this.selected_attributes.some(selectedAttribute => {
+                console.log(selectedAttribute.name);
+                if (selectedAttribute.isRoot) {
+                    flag = true;
+                    return true;
+                }
+            })
+            return flag;
         }
     },
     watch: {
