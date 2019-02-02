@@ -9,6 +9,7 @@
                                         @on-update-columns="showModal = true"
                                         @on-post="goToPost"
                                         @on-change-query="onChangeQuery"
+                                        @on-refresh="onRefresh"
                                         :totalRows="totalRows">
                         <template slot="actions" slot-scope="props">
                             <div class="btn-group" role="group" aria-label="Actions">
@@ -118,7 +119,11 @@ export default {
                 {
                     btn_text: "Post",
                     event_name: "on-post"
-                }
+                },
+                {
+                    btn_text: "Refresh",
+                    event_name: "on-refresh"
+                },
             ],
             deleteActions : [],
             deleteRequestParameters: [],
@@ -181,6 +186,9 @@ export default {
                     this.deleteActions.push(action);
                 }
             });
+        },
+        onRefresh() {
+            this.getData(this.fullUrl);
         },
 
         goToPost() {
