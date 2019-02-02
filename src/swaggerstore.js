@@ -5,6 +5,7 @@ var _ = {
   isEmpty: require('lodash/isEmpty'),
   map: require('lodash/map'),
   find: require('lodash/find'),
+  findIndex: require('lodash/findIndex'),
   has: require('lodash/has'),
   forEach: require('lodash/forEach'),
 };
@@ -55,6 +56,10 @@ export default new Vuex.Store({
   getters: {
     IS_CONFIG_EMPTY: state => {
       return _.isEmpty(state.config);
+    },
+
+    crudStateIndex: state => (path,method) => {
+      return _.findIndex(state.crudTableViewStates, {"path":path,"method":method});
     },
 
     getCrudTableViewStates: state => {

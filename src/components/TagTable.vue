@@ -9,7 +9,7 @@
 
                     <template slot="actions" slot-scope="props">
                         <div class="btn-group" role="group" aria-label="Actions">
-                            <a v-if='props.row.method == "get" && IS_CRUDABLE(props.row.path,props.row.method)' href="#" @click.prevent='showSelectEntryPointModal(props.row.path,props.row.method)' data-toggle="tooltip" data-placement="top" title="CRUD" class="btn btn-sm btn-secondary btn-action">
+                            <a v-if='props.row.method == "get" && IS_CRUDABLE(props.row.path,props.row.method)' href="#" @click.prevent='showSelectEntryPointModal(props.row.path,props.row.method)' :class="crudButtonColor(props.row)" data-toggle="tooltip" data-placement="top" title="CRUD" class="btn btn-sm btn-action btn-secondary">
                                 <i class="fas fa-table"></i>
                             </a>
                             <a v-if='props.row.method == "get"' href="" @click.prevent='handleFormView(props.row.path,props.row.method)' data-toggle="tooltip" data-placement="top" title="Form-view" class="btn btn-sm btn-secondary btn-action">
@@ -155,6 +155,13 @@
                 'removeCrudTableViewState',
             ]),
             showSelectEntryPointModal(path,method) {
+                let index = this.crudStateIndex(path,method);
+
+                if (index > -1) {
+                    this.$router.push({ path: `/crud/${index}` });
+                    return;
+                }
+
                 if (this.selectedPath != path || this.selectedMethod != method) {
                     this.response = this.getResponseByPathAndMethod(path,method);
                     this.parameters = _.cloneDeep(this.getParametersByPathAndMethod(path,method));
@@ -226,6 +233,10 @@
                         }
                     });
             },
+            crudButtonColor(row) {
+                let result = this.crudStateIndex(row.path,row.method);
+                return {'btn-success' : (result > -1), 'btn-secondary' : (result > -1)}
+            },
             startCrud(payload) {
 
                 let index = _.findIndex(this.getCrudTableViewStates, { 'path': this.selectedPath, 'method': this.selectedMethod });
@@ -288,7 +299,8 @@
             "getParametersByPathAndMethod",
             "getRequestByPathAndMethod",
             "IS_CRUDABLE",
-            "SERVER_URL"
+            "SERVER_URL",
+            "crudStateIndex"
             ]),
             tag(){
                 return this.getTagByName(this.group.tag_name);
