@@ -158,7 +158,7 @@
                 let index = this.crudStateIndex(path,method);
 
                 if (index > -1) {
-                    this.$router.push({ path: `/crud/${index}` });
+                    this.$router.push({ path: `/crud/`, query: { path, method } });
                     return;
                 }
 
@@ -261,7 +261,7 @@
                     if (index == -1) {
                         index = this.getCrudTableViewStates.length - 1;
                     }
-                    this.$router.push({ path: `/crud/${index}` })
+                    this.$router.push({ path: `/crud/`, query: { path: this.selectedPath, method:this.selectedMethod } })
                     // this.$router.push({ name: 'crud', params: {
                     //     payload,
                     //     paths: this.group.paths

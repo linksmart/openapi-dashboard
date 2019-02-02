@@ -133,6 +133,7 @@ export default {
             selectedDeleteMethod: '',
             deleteSuccess:"",
             deleteError:"",
+            stateIndex : -1
         }
     },
     components: {
@@ -141,12 +142,14 @@ export default {
         DeleteModal
     },
     mounted(){
+        this.stateIndex = this.crudStateIndex(this.$route.query.path,this.$route.query.method);
+        console.log(this.stateIndex,this.getCrudTableViewStatesCount);
 
-        if (this.$route.params.id >= this.getCrudTableViewStatesCount) {
-            this.$router.push({name: 'explore'});
+        if (this.stateIndex == -1 || this.stateIndex >= this.getCrudTableViewStatesCount) {
+            this.$router.push({name: 'explorer'});
             return;
         }
-        let state = this.getCrudTableViewState(this.$route.params.id);
+        let state = this.getCrudTableViewState(this.stateIndex);
 
         let payload = state.payload;
         this.method = payload.method;
@@ -306,7 +309,7 @@ export default {
         },
         updateAttributes(selected_attributes) {
             this.selected_attributes = selected_attributes;
-            this.updateCrudTableViewStateSelectedAttributes({index : this.$route.params.id, selectedAttributes : selected_attributes});
+            this.updateCrudTableViewStateSelectedAttributes({index : this.stateIndex, selectedAttributes : selected_attributes});
             this.generateColumns();
             this.generateRows(this.data);
         }
@@ -317,7 +320,8 @@ export default {
         'getParametersByPathAndMethod',
         'getRequestByPathAndMethod',
         'getCrudTableViewState',
-        'getCrudTableViewStatesCount'
+        'getCrudTableViewStatesCount',
+        'crudStateIndex',
         ]),
         canDelete() {
             let path = _.find(this.paths, { 'method': "delete" });
@@ -345,14 +349,6 @@ export default {
                 this.generateDeleteActions();
             },
             deep: true
-        },
-        hasId(newValue,oldVal) {
-
-        },
-        '$route' (to, from) {
-            // react to route changes...
-            console.log(to);
-
         }
     }
 }

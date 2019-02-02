@@ -54,7 +54,7 @@ const routes = [
     },
     {
         name: 'crud',
-        path: '/crud/:id',
+        path: '/crud/',
         component: Crud,
     },
     {
