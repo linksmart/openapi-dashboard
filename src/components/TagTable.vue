@@ -21,9 +21,9 @@
                             <a v-if='props.row.method == "delete"' href="" @click.prevent='handleDelete(props.row.path,props.row.method)' data-toggle="tooltip" data-placement="top" title="Delete" class="btn btn-sm btn-danger btn-action">
                                 <i class="fas fa-trash-alt"></i>
                             </a>
-                            <a v-if='props.row.method == "put"' href="" @click.prevent='handlePut(props.row.path,props.row.method)' data-toggle="tooltip" data-placement="top" title="Put" class="btn btn-sm btn-secondary btn-action">
+                            <!-- <a v-if='props.row.method == "put"' href="" @click.prevent='handlePut(props.row.path,props.row.method)' data-toggle="tooltip" data-placement="top" title="Put" class="btn btn-sm btn-secondary btn-action">
                                 <i class="fas fa-edit"></i>
-                            </a>
+                            </a> -->
                         </div>
                     </template>
                 </vue-bootstrap4-table>
@@ -48,6 +48,7 @@
                                             @closeModal="showFormViewModal=false"
                                             @go-to-form-view="goToFormView"
                                             />
+
                 <delete-modal :table-index='propIndex'
                                 :show-modal='showDeleteModal'
                                 :path='selectedPath'
@@ -182,18 +183,18 @@
                     this.goToFormView(this.SERVER_URL + path)
                 }
             },
-            handlePut(path,method) {
-                if (this.selectedPath != path || this.selectedMethod != method) {
-                    this.parameters = this.getParametersByPathAndMethod(path,method);
-                    this.selectedPath = path;
-                    this.selectedMethod = method;
-                }
-                if (this.parameters.length > 0) {
-                    // this.showFormViewModal = true;
-                } else{
-                    this.goToPutView(this.SERVER_URL + path)
-                }
-            },
+            // handlePut(path,method) {
+            //     if (this.selectedPath != path || this.selectedMethod != method) {
+            //         this.parameters = this.getParametersByPathAndMethod(path,method);
+            //         this.selectedPath = path;
+            //         this.selectedMethod = method;
+            //     }
+            //     if (this.parameters.length > 0) {
+            //         this.showPutViewModal = true;
+            //     } else{
+            //         this.goToPutView(this.SERVER_URL + path)
+            //     }
+            // },
             handleDelete(path,method) {
                 if (this.selectedPath != path || this.selectedMethod != method) {
                     this.parameters = this.getParametersByPathAndMethod(path,method);
@@ -279,17 +280,17 @@
                     });
                 });
             },
-            goToPutView(url) {
-                this.showFormViewModal = false;
-                this.$nextTick(function () {
-                    this.$router.push({
-                        name: 'formView',
-                        params: {
-                            url
-                            }
-                    });
-                });
-            }
+            // goToPutView(url) {
+            //     this.showPutViewModal = false;
+            //     this.$nextTick(function () {
+            //         this.$router.push({
+            //             name: 'put',
+            //             params: {
+            //                 url
+            //                 }
+            //         });
+            //     });
+            // }
         },
         computed: {
             ...mapGetters([

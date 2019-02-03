@@ -31,6 +31,7 @@
     import RequestParametersForm from '../RequestParametersForm.vue';
 
     export default {
+        name: "FormViewParametersModal",
         props: ['showModal','serverUrl','path','method','tableIndex','parameters'],
         data: function () {
             return {

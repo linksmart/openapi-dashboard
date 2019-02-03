@@ -18,6 +18,7 @@ import Explorer from "./components/Explorer.vue";
 import Crud from "./components/Crud.vue";
 import Post from "./components/Post.vue";
 import FormView from "./components/FormView.vue";
+import Put from "./components/Put.vue";
 
 import 'vue-good-table/dist/vue-good-table.css'
 import Noty from 'noty';
@@ -68,10 +69,10 @@ const routes = [
         component: FormView,
     },
     {
-        name: 'putView',
-        path: '/put-view',
-        component: FormView,
-    },
+        name: 'put',
+        path: '/put',
+        component: Put,
+    }
 ];
 
 // define a mixin object

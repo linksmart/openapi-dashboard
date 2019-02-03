@@ -13,11 +13,23 @@
                                         :totalRows="totalRows">
                         <template slot="actions" slot-scope="props">
                             <div class="btn-group" role="group" aria-label="Actions">
-                                <template v-if="canDelete">
-                                    <button v-for="(action,index) in deleteActions" :disabled="!hasId" :key="index" @click.prevent='handleDelete(action,props.row)' data-toggle="tooltip" data-placement="top" title="Delete" class="btn btn-sm btn-danger btn-action">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
+                                <template v-for="(action,index) in rowActions">
+                                    <template v-if="action.method == 'delete'">
+                                        <button :disabled="!hasId" :key="index" @click.prevent='handleDelete(action,props.row)' data-toggle="tooltip" data-placement="top" title="Delete" class="btn btn-sm btn-danger btn-action">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </template>
+                                    <template v-if="action.method == 'put'">
+                                        <button :key="index" @click.prevent='handlePut(action,props.row)' data-toggle="tooltip" data-placement="top" title="Put" class="btn btn-sm btn-secondary btn-action">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                    </template>
                                 </template>
+                                <!-- <template v-if="canPut">
+                                    <button v-for="(action,index) in putActions" :key="index" @click.prevent='handleDelete(action,props.row)' data-toggle="tooltip" data-placement="top" title="Delete" class="btn btn-sm btn-secondary btn-action">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </template> -->
                             </div>
                         </template>
                     </vue-bootstrap4-table>
@@ -125,7 +137,7 @@ export default {
                     event_name: "on-refresh"
                 },
             ],
-            deleteActions : [],
+            rowActions : [],
             deleteRequestParameters: [],
             deleteRequestParametersPrefiles: [],
             showDeleteModal: false,
@@ -143,8 +155,6 @@ export default {
     },
     mounted(){
         this.stateIndex = this.crudStateIndex(this.$route.query.path,this.$route.query.method);
-        console.log(this.stateIndex,this.getCrudTableViewStatesCount);
-
         if (this.stateIndex == -1 || this.stateIndex >= this.getCrudTableViewStatesCount) {
             this.$router.push({name: 'explorer'});
             return;
@@ -163,7 +173,8 @@ export default {
         this.selected_attributes = payload.selected_attributes;
         this.entry_data_properties = payload.entry_data_properties;
         this.request_params = payload.request_params;
-        this.generateDeleteActions();
+        this.generateActions();
+        // this.generatePutActions();
         // if (this.requestQueryParams.per_page) {
         //     // this.config.per_page = this.requestQueryParams.per_page;
         //     // this.config.page = this.requestQueryParams.page;
@@ -176,20 +187,34 @@ export default {
         ...mapMutations( [
             'updateCrudTableViewStateSelectedAttributes'
         ]),
-        generateDeleteActions() {
-            this.deleteActions = [];
+        generateActions() {
+            this.rowActions = [];
             this.paths.forEach((path) => {
-                if (path.method == "delete") {
+                if (path.method == "delete" || path.method == "put") {
                     let action = {
                         "path" : path.path,
                         "method" : path.method,
                         "requestParameters" : _.cloneDeep(this.getParametersByPathAndMethod(path.path,path.method))
                     }
 
-                    this.deleteActions.push(action);
+                    this.rowActions.push(action);
                 }
             });
         },
+        // generatePutActions() {
+        //     this.putActions = [];
+        //     this.paths.forEach((path) => {
+        //         if (path.method == "put") {
+        //             let action = {
+        //                 "path" : path.path,
+        //                 "method" : path.method,
+        //                 "requestParameters" : _.cloneDeep(this.getParametersByPathAndMethod(path.path,path.method))
+        //             }
+
+        //             this.putActions.push(action);
+        //         }
+        //     });
+        // },
         onRefresh() {
             this.getData(this.fullUrl);
         },
@@ -235,6 +260,23 @@ export default {
             } else {
                 this.triggerDelete(this.SERVER_URL+path);
             }
+        },
+        handlePut(action,row) {
+            let prefils = [];
+            let rootAttribute = _.find(this.selected_attributes,{isRoot:true});
+            if (rootAttribute) {
+                prefils = [{
+                    name: rootAttribute.name,
+                    value: _.get(row,rootAttribute.name)
+                }];
+            }
+            this.$router.push({ name: 'put', params: {
+                    path: action.path,
+                    method: action.method,
+                    model: row,
+                    prefils: prefils
+                }
+            });
         },
         triggerDelete(url) {
             this.showDeleteModal = false;
@@ -294,18 +336,22 @@ export default {
             this.getData(fullPath);
         },
         generateRows(data) {
-            let rows = [];
-            let self = this;
-            _.forEach(data,function(value,key) {
-                let row = {
+            if(!data) {
+                return;
+            }
 
-                };
-                _.forEach(self.selected_attributes,function(selected_attribute,key) {
-                    row[selected_attribute.data_path] = _.get(value,selected_attribute.data_path);
-                });
-                rows.push(row);
-            });
-            this.rows = rows;
+            let rows = [];
+            // let self = this;
+            // _.forEach(data,function(value,key) {
+            //     let row = {
+
+            //     };
+            //     _.forEach(self.selected_attributes,function(selected_attribute,key) {
+            //         row[selected_attribute.data_path] = _.get(value,selected_attribute.data_path);
+            //     });
+            //     rows.push(row);
+            // });
+            this.rows = data;
         },
         updateAttributes(selected_attributes) {
             this.selected_attributes = selected_attributes;
@@ -339,14 +385,18 @@ export default {
             return flag;
         },
         canPost() {
-            let index = _.findIndex(this.paths, { 'method': "post"});
-            return (index != -1)
+            return (_.findIndex(this.paths, { 'method': "post"}) != -1)
+        },
+        canPut() {
+            return (_.findIndex(this.paths, { 'method': "put"}) != -1);
         }
     },
     watch: {
         selected_attributes: {
             handler: function(newValue) {
-                this.generateDeleteActions();
+                // TODO - potentially remove these two fn calls in future
+                this.generateActions();
+                // this.generatePutActions();
             },
             deep: true
         }
