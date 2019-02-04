@@ -73,6 +73,7 @@
 import axios from 'axios';
 import { mapMutations,mapGetters } from 'vuex';
 var URI = require('urijs');
+var URITemplate = require('urijs/src/URITemplate');
 import VueBootstrap4Table from 'vue-bootstrap4-table'
 import SelectAttributesModal from './modals/SelectAttributesModal.vue';
 import DeleteModal from './modals/DeleteModal.vue';
@@ -108,6 +109,7 @@ export default {
                     visibility: false,
                 },
                 per_page: 5,
+                page: 1,
                 checkbox_rows: false,
                 rows_selectable: false,
                 card_mode: false,
@@ -175,10 +177,12 @@ export default {
         this.request_params = payload.request_params;
         this.generateActions();
         // this.generatePutActions();
-        // if (this.requestQueryParams.per_page) {
-        //     // this.config.per_page = this.requestQueryParams.per_page;
-        //     // this.config.page = this.requestQueryParams.page;
-        // }
+        if (this.requestQueryParams.per_page) {
+            this.config.per_page = this.requestQueryParams.per_page;
+        }
+        if (this.requestQueryParams.page) {
+            this.config.page = this.requestQueryParams.page;
+        }
         this.getData(this.fullUrl);
         this.generateColumns();
         this.generateRows();
@@ -293,12 +297,12 @@ export default {
 
         },
         getData(url) {
-            let self = this;
             axios.get(url)
-            .then(function (response) {
-                self.data = _.get(response,"data."+self.entry_data_path);
-                self.totalRows = response.data.total;
-                self.generateRows(self.data);
+            .then((response) => {
+                this.data = _.get(response,"data."+this.entry_data_path);
+                this.totalRows = response.data.total;
+                // this.config.page = response.data.page;
+                this.generateRows(this.data);
             });
         },
         generateColumns() {
@@ -331,8 +335,8 @@ export default {
             if ((this.url == "" && this.fullUrl == "")) {
                 return;
             }
-
-            let fullPath = new URI(this.url).addQuery(paginationQuery).toString();
+            let url = URITemplate(this.url).expand(this.uriParams);
+            let fullPath = new URI(url).addQuery(paginationQuery).toString();
             this.getData(fullPath);
         },
         generateRows(data) {
