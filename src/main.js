@@ -19,6 +19,7 @@ import Crud from "./components/Crud.vue";
 import Post from "./components/Post.vue";
 import FormView from "./components/FormView.vue";
 import Put from "./components/Put.vue";
+import NavBar from "./components/NavBar.vue";
 import Info from './components/info/Info.vue';
 import { mapMutations,mapGetters } from 'vuex'
 import 'vue-good-table/dist/vue-good-table.css'
@@ -119,6 +120,7 @@ new Vue({
         ]),
     },
     components: {
-        Info
+        Info,
+        NavBar
     }
 })
