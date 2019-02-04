@@ -6,6 +6,7 @@
                                         :config="config"
                                         :rows="rows"
                                         :actions="actions"
+                                        :classes="classes"
                                         @on-update-columns="showModal = true"
                                         @on-post="goToPost"
                                         @on-change-query="onChangeQuery"
@@ -13,7 +14,7 @@
                                         @on-reset-state="onResetState"
                                         :totalRows="totalRows">
                         <template slot="actions" slot-scope="props">
-                            <div class="btn-group" role="group" aria-label="Actions">
+                            <div class="btn-group btn-group-xs" role="group" aria-label="Actions">
                                 <template v-for="(action,index) in rowActions">
                                     <template v-if="action.method == 'delete'">
                                         <button :disabled="!hasId" :key="index" @click.prevent='handleDelete(action,props.row)' data-toggle="tooltip" data-placement="top" title="Delete" class="btn btn-sm btn-danger btn-action">
@@ -118,6 +119,9 @@ export default {
                 show_reset_button:false,
                 server_mode:true
             },
+            classes: {
+                table: "table-striped table-bordered table-sm"
+            },            
             queryParams: {
                 sort: [],
                 filters: [],

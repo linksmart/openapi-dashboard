@@ -5,20 +5,21 @@
                 <Tag :tag="tag" />
                 <vue-bootstrap4-table :columns="columns"
                                       :config="config"
+                                      :classes="classes"
                                       :rows="rows">
 
                     <template slot="actions" slot-scope="props">
-                        <div class="btn-group" role="group" aria-label="Actions">
+                        <div class="btn-group btn-group-xs" role="group" aria-label="Actions">
                             <a v-if='props.row.method == "get" && IS_CRUDABLE(props.row.path,props.row.method)' href="#" @click.prevent='showSelectEntryPointModal(props.row.path,props.row.method)' :class="crudButtonColor(props.row)" data-toggle="tooltip" data-placement="top" title="CRUD" class="btn btn-sm btn-action btn-secondary">
                                 <i class="fas fa-table"></i>
                             </a>
-                            <a v-if='props.row.method == "get"' href="" @click.prevent='handleFormView(props.row.path,props.row.method)' data-toggle="tooltip" data-placement="top" title="Form-view" class="btn btn-sm btn-secondary btn-action">
+                            <a v-if='props.row.method == "get"' href="" @click.prevent='handleFormView(props.row.path,props.row.method)' data-toggle="tooltip" data-placement="top" title="Form-view" class="btn btn-secondary btn-action">
                                 <i class="fab fa-wpforms"></i>
                             </a>
-                            <a v-if='props.row.method == "post"' href="" @click.prevent='initPost(props.row.path,props.row.method)' data-toggle="tooltip" data-placement="top" title="Post" class="btn btn-sm btn-secondary btn-action">
+                            <a v-if='props.row.method == "post"' href="" @click.prevent='initPost(props.row.path,props.row.method)' data-toggle="tooltip" data-placement="top" title="Post" class="btn btn-secondary btn-action">
                                 <i class="fas fa-envelope"></i>
                             </a>
-                            <a v-if='props.row.method == "delete"' href="" @click.prevent='handleDelete(props.row.path,props.row.method)' data-toggle="tooltip" data-placement="top" title="Delete" class="btn btn-sm btn-danger btn-action">
+                            <a v-if='props.row.method == "delete"' href="" @click.prevent='handleDelete(props.row.path,props.row.method)' data-toggle="tooltip" data-placement="top" title="Delete" class="btn btn-danger btn-action">
                                 <i class="fas fa-trash-alt"></i>
                             </a>
                             <!-- <a v-if='props.row.method == "put"' href="" @click.prevent='handlePut(props.row.path,props.row.method)' data-toggle="tooltip" data-placement="top" title="Put" class="btn btn-sm btn-secondary btn-action">
@@ -117,6 +118,9 @@
                         column_text_alignment:  "text-left",
                     },
                 ],
+                classes: {
+                    table: "table-striped table-bordered table-sm"
+                },
                 rows: [],
                 response: {},
                 request_body: {},
@@ -135,7 +139,8 @@
                     pagination:false,
                     pagination_info:false,
                     show_refresh_button:false,
-                    show_reset_button:false
+                    show_reset_button:false,
+                    highlight_row_hover:false
                 }
             }
         },
