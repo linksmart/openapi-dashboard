@@ -61,7 +61,7 @@
                     <!-- <router-link class="btn btn-primary" :to="{ name: 'test', params: { selected_attributes } }">
                     Start crud
                 </router-link> -->
-                <button type="button" :disabled='!isValidEntryData || parameter_form_invalid || selected_attributes.length == 0' class="btn btn-primary" @click='startCrud'>Start CRUD</button>
+                <button type="button" v-show='isValidEntryData && !parameter_form_invalid && selected_attributes.length != 0' class="btn btn-primary" @click='startCrud'>Start CRUD</button>
             </div>
         </div>
     </div>
