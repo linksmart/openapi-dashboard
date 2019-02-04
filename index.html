@@ -12,15 +12,11 @@
         <nav-bar></nav-bar>
         <div v-if='!IS_CONFIG_EMPTY' class="container-fluid">
             <br>
-            <div class="card">
-                <div class="card-body">
-                    <Info :info='INFO'/>
-                </div>
+            <div>
+                <Info :info='INFO'/>
             </div>
             <br>
-            <router-view>
-
-            </router-view>
+            <router-view></router-view>
         </div>
     </div>
     <!-- built files will be auto injected -->

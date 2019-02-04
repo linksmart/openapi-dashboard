@@ -10,12 +10,12 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav mr-auto">
                 <li class="nav-item">
-                    <router-link to="dashboard" class="nav-link">
+                    <router-link :to="{ name: 'dashboard'}" class="nav-link">
                         Dashboard
                     </router-link>
                 </li>
                 <li class="nav-item">
-                    <router-link to="explorer" class="nav-link">
+                    <router-link :to="{ name: 'explorer'}" class="nav-link">
                         Explorer
                     </router-link>
                 </li>
