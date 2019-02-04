@@ -1,15 +1,8 @@
 <template >
     <div v-if='!IS_CONFIG_EMPTY' class="container-fluid">
-        <div class="card">
-            <div class="card-body">
-                <Info :info='INFO'/>
-            </div>
-        </div>
-        <br>
         <TagTable v-for="(group, index) in groups" v-bind:key="index" v-bind:group="group" :prop-index='index'> </TagTable>
     </div>
 </template>
-
 
 <script>
 import axios from 'axios';
@@ -115,15 +108,15 @@ export default {
     },
     computed: {
         ...mapGetters([
-        'IS_CONFIG_EMPTY',
-        'VERSION',
-        'INFO',
-        'PATHS',
-        'IS_TAGS_EMPTY',
-        'TAGS',
-        'TAGS_NAMES',
-        'SERVER_URL',
-        'SWAGGER_CONFIG_URL',
+            'IS_CONFIG_EMPTY',
+            'VERSION',
+            'INFO',
+            'PATHS',
+            'IS_TAGS_EMPTY',
+            'TAGS',
+            'TAGS_NAMES',
+            'SERVER_URL',
+            'SWAGGER_CONFIG_URL',
         ]),
     }
 }

@@ -3,14 +3,58 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU"
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU"
   crossorigin="anonymous">
     <title>openapi-dashboard</title>
   </head>
   <body>
     <div id="app">
-      <router-view></router-view>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+                <router-link :to="{ name: 'root'}" class="navbar-brand">
+                    OpenApi Dashboard
+                </router-link>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
 
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                        <router-link to="dashboard" class="nav-link">
+                            Dashboard
+                        </router-link>
+                    </li>
+                    <li class="nav-item">
+                        <router-link to="explorer" class="nav-link">
+                            Explorer
+                        </router-link>
+                    </li>
+                    <!-- <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Dropdown
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="#">Action</a>
+                        <a class="dropdown-item" href="#">Another action</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="#">Something else here</a>
+                        </div>
+                    </li> -->
+                </ul>
+            </div>
+        </nav>
+        <div v-if='!IS_CONFIG_EMPTY' class="container-fluid">
+            <br>
+            <div class="card">
+                <div class="card-body">
+                    <Info :info='INFO'/>
+                </div>
+            </div>
+            <br>
+            <router-view>
+
+            </router-view>
+        </div>
     </div>
     <!-- built files will be auto injected -->
   </body>

@@ -19,7 +19,8 @@ import Crud from "./components/Crud.vue";
 import Post from "./components/Post.vue";
 import FormView from "./components/FormView.vue";
 import Put from "./components/Put.vue";
-
+import Info from './components/info/Info.vue';
+import { mapMutations,mapGetters } from 'vuex'
 import 'vue-good-table/dist/vue-good-table.css'
 import Noty from 'noty';
 import VueFormGenerator from "vue-form-generator";
@@ -99,7 +100,8 @@ Vue.mixin(myMixin);
 
 const router = new VueRouter({
     routes,
-    mode: 'history'
+    mode: 'history',
+    linkActiveClass: "active"
 });
 
 new Vue({
@@ -109,5 +111,14 @@ new Vue({
     data: {
         test: 'ddd'
     },
-    mounted() {}
+    mounted() {},
+    computed: {
+        ...mapGetters([
+            'IS_CONFIG_EMPTY',
+            'INFO',
+        ]),
+    },
+    components: {
+        Info
+    }
 })
