@@ -55,6 +55,7 @@
                                 :path='selectedPath'
                                 :method='selectedMethod'
                                 :server-url="SERVER_URL"
+                                :has-id="true"
                                 :parameters="parameters"
                                 @closeModal="showDeleteModal=false"
                                 @trigger-delete="triggerDelete"/>

@@ -1,7 +1,12 @@
 <template >
-    <vue-bootstrap4-form-generator :model="req_params_model"
-                                    :schema="req_params_schema"
-                                    :defaults="req_params_defaults" />
+    <div>
+        <vue-bootstrap4-form-generator :model="req_params_model"
+                                        :schema="req_params_schema"
+                                        :defaults="req_params_defaults" />
+        <small class="form-text text-danger" v-if="warningText != ''">
+            {{ warningText }}
+        </small>
+    </div>
 </template>
 
 
@@ -19,7 +24,7 @@
 
     export default {
         name: "RequestParametersForm",
-        props: ['serverUrl','path','parameters',"prefils"],
+        props: ['serverUrl','path','parameters',"prefils","warningText"],
         data: function () {
             return {
                 req_params_model: {},

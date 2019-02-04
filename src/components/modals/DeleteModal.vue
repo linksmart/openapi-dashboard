@@ -14,6 +14,7 @@
                                                  :server-url="serverUrl"
                                                  :path="path"
                                                  :prefils="prefils"
+                                                 :warning-text="warningText"
                                                  @on-request-params-change="handleRequestParamsChange" />
 
                     </div>
@@ -33,7 +34,7 @@
 
     export default {
         name: "DeleteModal",
-        props: ['showModal','serverUrl','path','method','tableIndex','parameters',"prefils"],
+        props: ['showModal','serverUrl','path','method','tableIndex','parameters',"prefils","hasId"],
         data: function () {
             return {
                 fullUrl: "",
@@ -59,6 +60,11 @@
                 } else {
                     $(this.$refs.selectArrayModal).modal('hide');
                 }
+            }
+        },
+        computed: {
+            warningText() {
+                return (!this.hasId) ? "* Select unique Id to prefil attributes" : "";
             }
         }
     }

@@ -17,7 +17,7 @@
                             <div class="btn-group btn-group-xs" role="group" aria-label="Actions">
                                 <template v-for="(action,index) in rowActions">
                                     <template v-if="action.method == 'delete'">
-                                        <button :disabled="!hasId" :key="index" @click.prevent='handleDelete(action,props.row)' data-toggle="tooltip" data-placement="top" title="Delete" class="btn btn-sm btn-danger btn-action">
+                                        <button :key="index" @click.prevent='handleDelete(action,props.row)' data-toggle="tooltip" data-placement="top" title="Delete" class="btn btn-sm btn-danger btn-action">
                                             <i class="fas fa-trash-alt"></i>
                                         </button>
                                     </template>
@@ -42,14 +42,11 @@
                                     :path='selectedDeletePath'
                                     :method='selectedDeleteMethod'
                                     :server-url="SERVER_URL"
+                                    :has-id="hasId"
                                     :parameters="deleteRequestParameters"
                                     :prefils="deleteRequestParametersPrefiles"
                                     @closeModal="showDeleteModal=false"
                                     @trigger-delete="triggerDelete"/>
-
-                <small class="form-text text-danger" v-if="!hasId">
-                    * Select an unique identifier to do CRUD operations
-                </small>
             </div>
             <div v-show='deleteError!=="" || deleteSuccess!==""' class="card-footer">
                 <div v-show='deleteSuccess!==""' class="alert alert-success" role="alert">
@@ -121,7 +118,7 @@ export default {
             },
             classes: {
                 table: "table-striped table-bordered table-sm"
-            },            
+            },
             queryParams: {
                 sort: [],
                 filters: [],
