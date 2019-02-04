@@ -10,6 +10,7 @@
                                         @on-post="goToPost"
                                         @on-change-query="onChangeQuery"
                                         @on-refresh="onRefresh"
+                                        @on-reset-state="onResetState"
                                         :totalRows="totalRows">
                         <template slot="actions" slot-scope="props">
                             <div class="btn-group" role="group" aria-label="Actions">
@@ -138,6 +139,10 @@ export default {
                     btn_text: "Refresh",
                     event_name: "on-refresh"
                 },
+                {
+                    btn_text: "Reset",
+                    event_name: "on-reset-state"
+                },
             ],
             rowActions : [],
             deleteRequestParameters: [],
@@ -189,7 +194,8 @@ export default {
     },
     methods: {
         ...mapMutations( [
-            'updateCrudTableViewStateSelectedAttributes'
+            'updateCrudTableViewStateSelectedAttributes',
+            'removeCrudTableViewState'
         ]),
         generateActions() {
             this.rowActions = [];
@@ -221,6 +227,10 @@ export default {
         // },
         onRefresh() {
             this.getData(this.fullUrl);
+        },
+        onResetState() {
+            this.removeCrudTableViewState(this.stateIndex);
+            this.$router.push({name: 'explorer'});
         },
 
         goToPost() {
