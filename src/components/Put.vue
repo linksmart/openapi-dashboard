@@ -30,12 +30,16 @@
             </div>
         </div>
     </div>
+    <success-response :response="successResponse"
+                      :show-modal="showSuccessResponseModal"
+                      @closeModal="showSuccessResponseModal=false"/>
 </div>
 </template>
 
 <script>
 import VueBootstrap4FormGenerator from "vue-bootstrap4-form-generator"
 import { mapMutations,mapGetters } from 'vuex';
+import SuccessResponse from "./modals/SuccessResponse.vue";
 var URI = require('urijs');
 var URITemplate = require('urijs/src/URITemplate');
 
@@ -56,7 +60,11 @@ export default {
             put_error: "",
             put_success: "",
             test: {},
-            prefils: []
+            prefils: [],
+            successResponse: {},
+            failureResponse: {},
+            showSuccessResponseModal: false,
+            showfailureResponseModal: false,
         }
     },
     mounted() {
@@ -73,27 +81,35 @@ export default {
         this.req_params_defaults = _.cloneDeep(this.req_params_model);
     },
     components: {
-        VueBootstrap4FormGenerator
+        VueBootstrap4FormGenerator,
+        SuccessResponse
     },
     methods: {
         putForm() {
             let self = this;
             self.put_error = "";
             axios.put(this.fullUrl, this.model)
-            .then(function (response) {
+            .then( (response) => {
                 if (response.status >= 200 && response.status < 230) {
-                    self.showSuccess("Successful")
+                    this.showSuccess("Successful")
                     if (response.data && !_.isEmpty(response.data)) {
-                        self.put_success = response.data;
+                        this.put_success = response.data;
                     } else {
-                        self.put_success = "Successful";
+                        this.put_success = "Successful";
                     }
-                    self.put_error = "";
+                    this.put_error = "";
+                    this.successResponse = response;
+                    this.failureResponse = {};
+                    this.showSuccessResponseModal = true;
+                    console.log(response,response.headers);
                 }
             })
-            .catch(function (error) {
-                self.put_success = "";
-                self.put_error = error.response.data.message;
+            .catch( (error) => {
+                this.failureResponse = error.response;
+                this.successResponse = {};
+                this.put_success = "";
+                this.put_error = error.response.data.message;
+                this.showfailureResponseModal = true;
             })
 
         },
