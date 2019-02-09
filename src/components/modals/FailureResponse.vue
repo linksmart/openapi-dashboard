@@ -1,25 +1,23 @@
 <template>
-    <div class="modal fade" ref="successResponseModal" tabindex="-1" role="dialog" aria-labelledby="Success response" aria-hidden="true">
+    <div class="modal fade" ref="failureResponseModal" tabindex="-1" role="dialog" aria-labelledby="Failure response" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Success Response <span class="badge badge-success">{{status}}</span></h5>
+                <h5 class="modal-title">Failure Response <span class="badge badge-danger">{{status}}</span></h5>
                 <button type="button" class="close" aria-label="Close" @click="$emit('closeModal')">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                <template v-if="hasSuccessMessage">
-                    <div class="success-message">
-                        <h6>
-                            Success message
-                        </h6>
-                        <span class="text-danger">
-                            {{this.successMessage}}
-                        </span>
-                    </div>
-                    <hr>
-                </template>
+                <div v-if="hasFailureMessage" class="failure-message">
+                    <h6>
+                        Failure message
+                    </h6>
+                    <span class="text-danger">
+                        {{this.failureMessage}}
+                    </span>
+                </div>
+                <hr>
                 <div class="headers">
                     <h6>
                         Response headers
@@ -64,16 +62,16 @@ export default {
         }
     },
     mounted() {
-        $(this.$refs.successResponseModal).on('hidden.bs.modal',  (e) => {
+        $(this.$refs.failureResponseModal).on('hidden.bs.modal',  (e) => {
             this.$emit('closeModal');
         });
     },
     watch: {
         showModal: function (val) {
             if (val) {
-                $(this.$refs.successResponseModal).modal('show');
+                $(this.$refs.failureResponseModal).modal('show');
             } else {
-                $(this.$refs.successResponseModal).modal('hide');
+                $(this.$refs.failureResponseModal).modal('hide');
             }
         },
     },
@@ -84,8 +82,7 @@ export default {
         isHeaderEmpty() {
             return _.isEmpty(this.response.headers)
         },
-
-        successMessage() {
+        failureMessage() {
             let message = "";
 
             if (this.isDataEmpty) {
@@ -102,8 +99,8 @@ export default {
 
             return message;
         },
-        hasSuccessMessage() {
-            return this.successMessage != "";
+        hasFailureMessage() {
+            return this.failureMessage != "";
         },
         status() {
             return _.has(this.response,'status') ? this.response.status : "-";

@@ -21,18 +21,13 @@
             <br>
             <button type="button" class="btn btn-primary" @click="putForm">put</button>
         </div>
-        <div class="card-footer" v-show=' put_error !== "" || put_success !== ""'>
-            <div v-if='put_error !== ""' class="alert alert-danger" role="alert">
-                <strong>{{put_error}}</strong>
-            </div>
-            <div v-if='put_success !== ""' class="alert alert-success" role="alert">
-                <strong>{{put_success}}</strong>
-            </div>
-        </div>
     </div>
     <success-response :response="successResponse"
                       :show-modal="showSuccessResponseModal"
                       @closeModal="showSuccessResponseModal=false"/>
+    <failure-response :response="failureResponse"
+                      :show-modal="showFailureResponseModal"
+                      @closeModal="showFailureResponseModal=false"/>
 </div>
 </template>
 
@@ -40,6 +35,7 @@
 import VueBootstrap4FormGenerator from "vue-bootstrap4-form-generator"
 import { mapMutations,mapGetters } from 'vuex';
 import SuccessResponse from "./modals/SuccessResponse.vue";
+import FailureResponse from "./modals/FailureResponse.vue";
 var URI = require('urijs');
 var URITemplate = require('urijs/src/URITemplate');
 
@@ -57,18 +53,15 @@ export default {
             req_params_model: {},
             req_params_schema: {},
             req_params_defaults: {},
-            put_error: "",
-            put_success: "",
             test: {},
             prefils: [],
             successResponse: {},
             failureResponse: {},
             showSuccessResponseModal: false,
-            showfailureResponseModal: false,
+            showFailureResponseModal: false,
         }
     },
     mounted() {
-        console.log(this.$route.params);
         this.selectedPath = this.$route.params.path;
         this.selectedMethod = this.$route.params.method;
         this.requestBody = this.getRequestByPathAndMethod(this.selectedPath,this.selectedMethod);
@@ -82,34 +75,24 @@ export default {
     },
     components: {
         VueBootstrap4FormGenerator,
-        SuccessResponse
+        SuccessResponse,
+        FailureResponse
     },
     methods: {
         putForm() {
             let self = this;
-            self.put_error = "";
             axios.put(this.fullUrl, this.model)
             .then( (response) => {
                 if (response.status >= 200 && response.status < 230) {
-                    this.showSuccess("Successful")
-                    if (response.data && !_.isEmpty(response.data)) {
-                        this.put_success = response.data;
-                    } else {
-                        this.put_success = "Successful";
-                    }
-                    this.put_error = "";
                     this.successResponse = response;
                     this.failureResponse = {};
                     this.showSuccessResponseModal = true;
-                    console.log(response,response.headers);
                 }
             })
             .catch( (error) => {
                 this.failureResponse = error.response;
                 this.successResponse = {};
-                this.put_success = "";
-                this.put_error = error.response.data.message;
-                this.showfailureResponseModal = true;
+                this.showFailureResponseModal = true;
             })
 
         },
@@ -395,5 +378,17 @@ export default {
 
         }
     },
+    watch: {
+        showFailureResponseModal(newVal,oldVal) {
+            if (!newVal) {
+                this.failureResponse = {}
+            }
+        },
+        showSuccessResponseModal(newVal,oldVal) {
+            if (!newVal) {
+                this.successResponse = {}
+            }
+        }
+    }
 }
 </script>
