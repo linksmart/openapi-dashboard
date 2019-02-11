@@ -293,7 +293,6 @@
             showModal: function (val) {
                 if (val) {
                     if (this.backUpPath != this.path || this.backUpMethod != this.method) {
-                        console.log("resetting");
                         this.resetData();
                     }
                     this.response_content = this.response.content;

@@ -22,9 +22,9 @@
                             <a v-if='props.row.method == "delete"' href="" @click.prevent='handleDelete(props.row.path,props.row.method)' data-toggle="tooltip" data-placement="top" title="Delete" class="btn btn-danger btn-action">
                                 <i class="fas fa-trash-alt"></i>
                             </a>
-                            <!-- <a v-if='props.row.method == "put"' href="" @click.prevent='handlePut(props.row.path,props.row.method)' data-toggle="tooltip" data-placement="top" title="Put" class="btn btn-sm btn-secondary btn-action">
+                            <a v-if='props.row.method == "put" && canPut(props.row.path)' href="" @click.prevent='handlePut(props.row.path,props.row.method)' data-toggle="tooltip" data-placement="top" title="Put" class="btn btn-sm btn-secondary btn-action">
                                 <i class="fas fa-edit"></i>
-                            </a> -->
+                            </a>
                         </div>
                     </template>
                 </vue-bootstrap4-table>
@@ -60,23 +60,25 @@
                                 @closeModal="showDeleteModal=false"
                                 @trigger-delete="triggerDelete"/>
 
-                </div>
-                <div v-show='deleteError!=="" || deleteSuccess!==""' class="card-footer">
-                    <div v-show='deleteSuccess!==""' class="alert alert-success" role="alert">
-                        <button type="button" class="close" aria-label="Close" @click="deleteSuccess=''">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                        <strong>Success!</strong> {{this.deleteSuccess}}
-                    </div>
-                    <div v-show='deleteError!==""' class="alert alert-danger" role="alert">
-                        <button type="button" class="close" aria-label="Close" @click="deleteError=''">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                        <strong>Oh snap!</strong> {{this.deleteError}}
-                    </div>
+                <put-modal :table-index='propIndex'
+                                :show-modal='showPutModal'
+                                :path='getSelectedPath'
+                                :method='getSelectedMethod'
+                                :server-url="SERVER_URL"
+                                :has-id="true"
+                                :parameters="getParameters"
+                                @closeModal="showPutModal=false"
+                                @trigger-put="goToPutView"/>
+
                 </div>
             </div>
             <br>
+        <success-response :response="successResponse"
+                        :show-modal="showSuccessResponseModal"
+                        @closeModal="showSuccessResponseModal=false"/>
+        <failure-response :response="failureResponse"
+                        :show-modal="showFailureResponseModal"
+                        @closeModal="showFailureResponseModal=false"/>
         </div>
     </template>
 
@@ -87,6 +89,9 @@
     import SelectEntryPointModal from './modals/SelectEntryPointModal.vue';
     import FormViewParametersModal from './modals/FormViewParametersModal.vue';
     import DeleteModal from './modals/DeleteModal.vue';
+    import PutModal from './modals/PutModal.vue';
+    import SuccessResponse from "./modals/SuccessResponse.vue";
+    import FailureResponse from "./modals/FailureResponse.vue";
     import VueBootstrap4Table from 'vue-bootstrap4-table'
 
     const _ = require("lodash")
@@ -99,6 +104,7 @@
                 showModal: false,
                 showFormViewModal: false,
                 showDeleteModal:false,
+                showPutModal:false,
                 columns: [
                     {
                         label: 'Path',
@@ -128,8 +134,9 @@
                 parameters: [],
                 selectedPath: '',
                 selectedMethod: '',
-                deleteSuccess:"",
-                deleteError:"",
+                getParameters: [],
+                getSelectedPath: '',
+                getSelectedMethod: '',
                 config: {
                     global_search: {
                         visibility: false,
@@ -142,7 +149,11 @@
                     show_refresh_button:false,
                     show_reset_button:false,
                     highlight_row_hover:false
-                }
+                },
+                successResponse: {},
+                failureResponse: {},
+                showSuccessResponseModal: false,
+                showFailureResponseModal: false
             }
         },
         mounted(){
@@ -153,7 +164,10 @@
             SelectEntryPointModal,
             FormViewParametersModal,
             DeleteModal,
-            VueBootstrap4Table
+            PutModal,
+            VueBootstrap4Table,
+            SuccessResponse,
+            FailureResponse
         },
         methods: {
             ...mapMutations( [
@@ -189,18 +203,27 @@
                     this.goToFormView(this.SERVER_URL + path)
                 }
             },
-            // handlePut(path,method) {
-            //     if (this.selectedPath != path || this.selectedMethod != method) {
-            //         this.parameters = this.getParametersByPathAndMethod(path,method);
-            //         this.selectedPath = path;
-            //         this.selectedMethod = method;
-            //     }
-            //     if (this.parameters.length > 0) {
-            //         this.showPutViewModal = true;
-            //     } else{
-            //         this.goToPutView(this.SERVER_URL + path)
-            //     }
-            // },
+            handlePut(path,method) {
+                let getPathIndex = this.getPathIndexByPutPath(path);
+                if (getPathIndex == -1) {
+                    return;
+                }
+
+                let get = this.group.paths[getPathIndex];
+                if (this.selectedPath != get.path || this.selectedMethod != get.method) {
+                    this.parameters = this.getParametersByPathAndMethod(path,method);
+                    this.selectedPath = path;
+                    this.selectedMethod = method;
+                    this.getParameters = this.getParametersByPathAndMethod(get.path,get.method);
+                    this.getSelectedPath = get.path;
+                    this.getSelectedMethod = get.method;
+                }
+                if (this.parameters.length > 0) {
+                    this.showPutModal = true;
+                } else{
+                    this.goToPutView(this.SERVER_URL + path)
+                }
+            },
             handleDelete(path,method) {
                 if (this.selectedPath != path || this.selectedMethod != method) {
                     this.parameters = this.getParametersByPathAndMethod(path,method);
@@ -217,12 +240,14 @@
                 this.showDeleteModal = false;
                 axios.delete(url)
                 .then((response) => {
-                    this.deleteError = "";
-                    this.deleteSuccess = JSON.stringify(response.data);
+                    this.successResponse = response;
+                    this.failureResponse = {};
+                    this.showSuccessResponseModal = true;
                 })
                 .catch((error) => {
-                    this.deleteSuccess = "";
-                    this.deleteError = JSON.stringify(error.response.data);
+                    this.failureResponse = error.response;
+                    this.successResponse = {};
+                    this.showFailureResponseModal = true;
                 })
             },
             initPost(path,method) {
@@ -262,17 +287,12 @@
 
                 this.showModal = false;
 
-                // return;
                 // next tick wait until the current DOM updates and then exeutes the function
                 this.$nextTick(function () {
                     if (index == -1) {
                         index = this.getCrudTableViewStates.length - 1;
                     }
                     this.$router.push({ path: `/crud/`, query: { path: this.selectedPath, method:this.selectedMethod } })
-                    // this.$router.push({ name: 'crud', params: {
-                    //     payload,
-                    //     paths: this.group.paths
-                    //     }});
                 });
             },
             goToFormView(url) {
@@ -286,17 +306,33 @@
                     });
                 });
             },
-            // goToPutView(url) {
-            //     this.showPutViewModal = false;
-            //     this.$nextTick(function () {
-            //         this.$router.push({
-            //             name: 'put',
-            //             params: {
-            //                 url
-            //                 }
-            //         });
-            //     });
-            // }
+            canPut(putPath) {
+                return  this.getPathIndexByPutPath(putPath) > -1;
+            },
+            getPathIndexByPutPath(putPath) {
+                return _.findIndex(this.group.paths, { method: "get", path: putPath});
+            },
+            goToPutView(url) {
+                this.showPutModal = false;
+                axios.get(url)
+                .then((response) => {
+                    if (response.status >= 200 && response.status < 230) {
+                        console.log(response.data);
+                        this.$router.push({ name: 'put', params: {
+                                path: this.selectedPath,
+                                method: this.selectedMethod,
+                                model: response.data,
+                                prefils: []
+                            }
+                        });
+                    }
+                })
+                .catch((error) => {
+                    this.failureResponse = error.response;
+                    this.successResponse = {};
+                    this.showFailureResponseModal = true;
+                })
+            }
         },
         computed: {
             ...mapGetters([
@@ -312,7 +348,6 @@
             tag(){
                 return this.getTagByName(this.group.tag_name);
             }
-
         }
     }
 
