@@ -42,7 +42,7 @@ const routes = [
         name: 'root',
         path: '/',
         redirect: {
-            name : 'explorer'
+            name : 'dashboard'
         },
     },
     {

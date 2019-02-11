@@ -10,9 +10,9 @@
   <body>
     <div id="app">
         <nav-bar></nav-bar>
-        <div v-if='!IS_CONFIG_EMPTY' class="container">
+        <div class="container">
             <br>
-            <div>
+            <div v-if='!IS_CONFIG_EMPTY'>
                 <Info :info='INFO'/>
             </div>
             <br>

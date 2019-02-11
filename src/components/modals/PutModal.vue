@@ -1,6 +1,6 @@
 <template >
     <div>
-        <div class="modal fade" ref='selectArrayModal' tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true" >
+        <div class="modal fade" ref='putModal' tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true" >
             <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -41,7 +41,7 @@
             }
         },
         mounted(){
-            $(this.$refs.selectArrayModal).on('hidden.bs.modal', function (e) {
+            $(this.$refs.putModal).on('hidden.bs.modal', function (e) {
                 this.$emit('closeModal');
             }.bind(this));
         },
@@ -56,9 +56,9 @@
         watch: {
             showModal: function (val) {
                 if (val) {
-                    $(this.$refs.selectArrayModal).modal('show');
+                    $(this.$refs.putModal).modal('show');
                 } else {
-                    $(this.$refs.selectArrayModal).modal('hide');
+                    $(this.$refs.putModal).modal('hide');
                 }
             }
         },
