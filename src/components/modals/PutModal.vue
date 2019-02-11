@@ -19,7 +19,7 @@
 
                     </div>
                     <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" @click='$emit("trigger-put",fullUrl)'>Put</button>
+                    <button type="button" class="btn btn-primary" @click='$emit("trigger-put",fullUrl)'>Fetch data for Put</button>
                     </div>
                 </div>
             </div>

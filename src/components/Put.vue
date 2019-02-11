@@ -12,7 +12,7 @@
 
     <br>
 
-    <div class="card">
+    <div class="card" v-if="canPut">
         <div class="card-header">
             Put form
         </div>
@@ -38,6 +38,7 @@ import SuccessResponse from "./modals/SuccessResponse.vue";
 import FailureResponse from "./modals/FailureResponse.vue";
 var URI = require('urijs');
 var URITemplate = require('urijs/src/URITemplate');
+import { EventBus } from '../event-bus.js';
 
 export default {
     name: "Put",
@@ -62,10 +63,26 @@ export default {
         }
     },
     mounted() {
+        EventBus.$on('put-confirmable', (result) => {
+            if (result.success) {
+                this.$router.push({ name: "explorer" });
+            }
+        });
+
         this.selectedPath = this.$route.params.path;
         this.selectedMethod = this.$route.params.method;
         this.requestBody = this.getRequestByPathAndMethod(this.selectedPath,this.selectedMethod);
         this.request_parameters = this.getParametersByPathAndMethod(this.selectedPath,this.selectedMethod);
+        if (!this.canPut) {
+            EventBus.$emit('confirmation', {
+                msg: "Parameters missing to make put operation, Would you like to go back and start again?",
+                title: "Warning",
+                confirmable: true,
+                callback: "put-confirmable",
+                callbackData: "null"
+            });
+            return;
+        }
         this.transfromToModel();
         this.model = this.$route.params.model;
         this.prefils = this.$route.params.prefils;
@@ -376,6 +393,10 @@ export default {
                 return this.SERVER_URL+uriPath;
             }
 
+        },
+        canPut() {
+            return this.selectedPath != undefined && this.selectedMethod != undefined &&
+                   this.selectedMethod != "" && this.selectedPath != "";
         }
     },
     watch: {

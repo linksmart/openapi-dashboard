@@ -12,7 +12,7 @@
 
     <br>
 
-    <div class="card">
+    <div class="card" v-if="canPost">
         <div class="card-header">
             Post form
         </div>
@@ -39,6 +39,7 @@ import SuccessResponse from "./modals/SuccessResponse.vue";
 import FailureResponse from "./modals/FailureResponse.vue";
 var URI = require('urijs');
 var URITemplate = require('urijs/src/URITemplate');
+import { EventBus } from '../event-bus.js';
 
 export default {
     name: "Post",
@@ -62,10 +63,25 @@ export default {
         }
     },
     mounted() {
+        EventBus.$on('post-confirmable', (result) => {
+            if (result.success) {
+                this.$router.push({ name: "explorer" });
+            }
+        });
         this.requestBody = this.$route.params.request_body;
         this.selectedMethod = this.$route.params.selectedMethod;
         this.selectedPath = this.$route.params.selectedPath;
         this.request_parameters = this.$route.params.request_parameters;
+        if (!this.canPost) {
+            EventBus.$emit('confirmation', {
+                msg: "Parameters missing to make post confirmation, Would you like to go back and start again?",
+                title: "Warning",
+                confirmable: true,
+                callback: "post-confirmable",
+                callbackData: "null"
+            });
+            return;
+        }
         this.transfromToModel();
         this.req_params_model = this.generateReqParamModel(this.request_parameters);
         this.generateReqParamSchema();
@@ -375,6 +391,10 @@ export default {
                 return this.SERVER_URL+uriPath;
             }
 
+        },
+        canPost() {
+            return this.selectedPath != undefined && this.selectedMethod != undefined &&
+                   this.selectedMethod != "" && this.selectedPath != "";
         }
     },
 }

@@ -15,6 +15,7 @@ import VueGoodTablePlugin from 'vue-good-table';
 import store from './swaggerstore';
 import Dashboard from "./components/Dashboard.vue";
 import Explorer from "./components/Explorer.vue";
+import Confirmation from "./components/modals/Confirmation.vue";
 import Crud from "./components/Crud.vue";
 import Post from "./components/Post.vue";
 import FormView from "./components/FormView.vue";
@@ -28,8 +29,6 @@ import VueFormGenerator from "vue-form-generator";
 import ModuleLibrary from 'vfg-field-array';
 import ModuleLibraryObject from 'vfg-field-object';
 import './assets/scss/index.scss';
-
-
 
 Vue.use(VueRouter);
 Vue.use(VueGoodTablePlugin);
@@ -105,6 +104,21 @@ const router = new VueRouter({
     linkActiveClass: "active"
 });
 
+
+router.beforeEach((to, from, next) => {
+    let restrictReloadRouteNames = ["put","post"];
+
+    if (restrictReloadRouteNames.find(routeName => routeName === to.name)) {
+        $(window).on("beforeunload", function(e) {
+            return false;
+        });
+    } else {
+        $(window).off("beforeunload");
+    }
+
+    next();
+});
+
 new Vue({
     el: '#app',
     router,
@@ -121,6 +135,7 @@ new Vue({
     },
     components: {
         Info,
-        NavBar
+        NavBar,
+        Confirmation
     }
 })
