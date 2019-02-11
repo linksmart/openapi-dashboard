@@ -48,22 +48,14 @@
                                     @closeModal="showDeleteModal=false"
                                     @trigger-delete="triggerDelete"/>
             </div>
-            <div v-show='deleteError!=="" || deleteSuccess!==""' class="card-footer">
-                <div v-show='deleteSuccess!==""' class="alert alert-success" role="alert">
-                    <button type="button" class="close" aria-label="Close" @click="deleteSuccess=''">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                    <strong>Success!</strong> {{this.deleteSuccess}}
-                </div>
-                <div v-show='deleteError!==""' class="alert alert-danger" role="alert">
-                    <button type="button" class="close" aria-label="Close" @click="deleteError=''">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                    <strong>Oh snap!</strong> {{this.deleteError}}
-                </div>
-            </div>
         </div>
 
+        <success-response :response="successResponse"
+                            :show-modal="showSuccessResponseModal"
+                            @closeModal="showSuccessResponseModal=false"/>
+        <failure-response :response="failureResponse"
+                            :show-modal="showFailureResponseModal"
+                            @closeModal="showFailureResponseModal=false"/>
     </div>
 </template>
 
@@ -76,6 +68,8 @@ var URITemplate = require('urijs/src/URITemplate');
 import VueBootstrap4Table from 'vue-bootstrap4-table'
 import SelectAttributesModal from './modals/SelectAttributesModal.vue';
 import DeleteModal from './modals/DeleteModal.vue';
+import SuccessResponse from "./modals/SuccessResponse.vue";
+import FailureResponse from "./modals/FailureResponse.vue";
 
 var _ = {
   forEach: require('lodash/forEach'),
@@ -151,15 +145,19 @@ export default {
             showDeleteModal: false,
             selectedDeletePath: '',
             selectedDeleteMethod: '',
-            deleteSuccess:"",
-            deleteError:"",
-            stateIndex : -1
+            stateIndex : -1,
+            successResponse: {},
+            failureResponse: {},
+            showSuccessResponseModal: false,
+            showFailureResponseModal: false,
         }
     },
     components: {
         SelectAttributesModal,
         VueBootstrap4Table,
-        DeleteModal
+        DeleteModal,
+        SuccessResponse,
+        FailureResponse
     },
     mounted(){
         this.stateIndex = this.crudStateIndex(this.$route.query.path,this.$route.query.method);
@@ -297,13 +295,15 @@ export default {
             this.showDeleteModal = false;
             axios.delete(url)
             .then((response) => {
-                this.deleteError = "";
-                this.deleteSuccess = JSON.stringify(response.data);
+                this.successResponse = response;
+                this.failureResponse = {};
+                this.showSuccessResponseModal = true;
                 this.getData(this.fullUrl);
             })
             .catch((error) => {
-                this.deleteSuccess = "";
-                this.deleteError = JSON.stringify(error.response.data);
+                this.failureResponse = error.response;
+                this.successResponse = {};
+                this.showFailureResponseModal = true;
             })
 
         },

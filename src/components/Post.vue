@@ -21,21 +21,22 @@
             <br>
             <button type="button" class="btn btn-primary" @click="postForm">Post</button>
         </div>
-        <div class="card-footer" v-show=' post_error !== "" || post_success !== ""'>
-            <div v-if='post_error !== ""' class="alert alert-danger" role="alert">
-                <strong>{{post_error}}</strong>
-            </div>
-            <div v-if='post_success !== ""' class="alert alert-success" role="alert">
-                <strong>{{post_success}}</strong>
-            </div>
-        </div>
     </div>
+
+    <success-response :response="successResponse"
+                      :show-modal="showSuccessResponseModal"
+                      @closeModal="showSuccessResponseModal=false"/>
+    <failure-response :response="failureResponse"
+                      :show-modal="showFailureResponseModal"
+                      @closeModal="showFailureResponseModal=false"/>
 </div>
 </template>
 
 <script>
 import VueBootstrap4FormGenerator from "vue-bootstrap4-form-generator"
 import { mapMutations,mapGetters } from 'vuex';
+import SuccessResponse from "./modals/SuccessResponse.vue";
+import FailureResponse from "./modals/FailureResponse.vue";
 var URI = require('urijs');
 var URITemplate = require('urijs/src/URITemplate');
 
@@ -53,9 +54,11 @@ export default {
             req_params_model: {},
             req_params_schema: {},
             req_params_defaults: {},
-            post_error: "",
-            post_success: "",
-            test: {}
+            test: {},
+            successResponse: {},
+            failureResponse: {},
+            showSuccessResponseModal: false,
+            showFailureResponseModal: false,
         }
     },
     mounted() {
@@ -69,27 +72,25 @@ export default {
         this.req_params_defaults = _.cloneDeep(this.req_params_model);
     },
     components: {
-        VueBootstrap4FormGenerator
+        VueBootstrap4FormGenerator,
+        SuccessResponse,
+        FailureResponse
     },
     methods: {
         postForm() {
             let self = this;
-            self.post_error = "";
             axios.post(this.fullUrl, this.model)
-            .then(function (response) {
+            .then( (response) => {
                 if (response.status >= 200 && response.status < 230) {
-                    self.showSuccess("Successful")
-                    if (response.data && !_.isEmpty(response.data)) {
-                        self.post_success = response.data;
-                    } else {
-                        self.post_success = "Successful";
-                    }
-                    self.post_error = "";
+                    this.successResponse = response;
+                    this.failureResponse = {};
+                    this.showSuccessResponseModal = true;
                 }
             })
-            .catch(function (error) {
-                self.post_success = "";
-                self.post_error = error.response.data.message;
+            .catch( (error) => {
+                this.failureResponse = error.response;
+                this.successResponse = {};
+                this.showFailureResponseModal = true;
             })
 
         },
