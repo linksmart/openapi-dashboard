@@ -9,15 +9,17 @@
                 </button>
             </div>
             <div class="modal-body">
-                <div v-if="hasFailureMessage" class="failure-message">
-                    <h6>
-                        Failure message
-                    </h6>
-                    <span class="text-danger">
-                        {{this.failureMessage}}
-                    </span>
-                </div>
-                <hr>
+                <template v-if="hasFailureMessage">
+                    <div class="failure-message">
+                        <h6>
+                            Failure message
+                        </h6>
+                        <span class="text-danger">
+                            {{this.failureMessage}}
+                        </span>
+                    </div>
+                    <hr>
+                </template>
                 <div class="headers">
                     <h6>
                         Response headers
@@ -44,7 +46,7 @@
 
 <script>
 export default {
-    name: "SuccessResponse",
+    name: "FailureResponse",
     props: {
         response: {
             type: Array | Object | String,
@@ -77,10 +79,10 @@ export default {
     },
     computed: {
         isDataEmpty() {
-            return _.isEmpty(this.response.data)
+            return (!_.has(this.response,"data")) || _.isEmpty(this.response.data)
         },
         isHeaderEmpty() {
-            return _.isEmpty(this.response.headers)
+            return (!_.has(this.response,"headers")) || _.isEmpty(this.response.headers)
         },
         failureMessage() {
             let message = "";

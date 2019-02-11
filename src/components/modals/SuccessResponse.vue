@@ -79,10 +79,10 @@ export default {
     },
     computed: {
         isDataEmpty() {
-            return _.isEmpty(this.response.data)
+            return (!_.has(this.response,"data")) || _.isEmpty(this.response.data)
         },
         isHeaderEmpty() {
-            return _.isEmpty(this.response.headers)
+            return (!_.has(this.response,"headers")) || _.isEmpty(this.response.headers)
         },
 
         successMessage() {
