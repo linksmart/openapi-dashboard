@@ -317,12 +317,17 @@
                 axios.get(url)
                 .then((response) => {
                     if (response.status >= 200 && response.status < 230) {
-                        console.log(response.data);
+                        let prefils = this.parameters.map(parameter => {
+                            return {
+                                name : parameter.name,
+                                value : (_.has(response.data,parameter.name) ? response.data[parameter.name] : "")
+                            }
+                        })
                         this.$router.push({ name: 'put', params: {
                                 path: this.selectedPath,
                                 method: this.selectedMethod,
                                 model: response.data,
-                                prefils: []
+                                prefils
                             }
                         });
                     }
