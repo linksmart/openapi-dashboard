@@ -84,7 +84,6 @@ export default {
             return;
         }
         this.transfromToModel();
-        this.model = this.$route.params.model;
         this.prefils = this.$route.params.prefils;
         this.req_params_model = this.generateReqParamModel(this.request_parameters);
         this.generateReqParamSchema();
@@ -119,11 +118,12 @@ export default {
                 if (
                     this.requestBody.content["application/json"].schema.type == "object"
                 ) {
+                    let prefils = this.$route.params.model;
                     let result = self.makeModel(
                         "pepper",
-                        this.requestBody.content["application/json"].schema
+                        this.requestBody.content["application/json"].schema,
+                        prefils
                     );
-
                     self.model = _.cloneDeep(result[0].pepper);
                     self.defaults = _.cloneDeep(result[0].pepper);
                     self.schema = _.cloneDeep(result[1].pepper);
@@ -132,7 +132,8 @@ export default {
                 ) {
                     let result = self.makeModel(
                         "pepper",
-                        this.requestBody.content["application/json"].schema
+                        this.requestBody.content["application/json"].schema,
+                        prefils
                     );
 
                     self.model = _.cloneDeep(result[0].pepper);
@@ -201,13 +202,14 @@ export default {
 
             }
         },
-        makeModel(salt, pepper) {
+        makeModel(salt, pepper,prefils=null) {
             let self = this;
             if (pepper.type == "object") {
                 let obj = {};
                 obj[salt] = {};
                 let schemaObj = {};
                 schemaObj[salt] = {
+
                     type: "Object",
                     name: salt,
                     canRemove: true,
@@ -218,11 +220,11 @@ export default {
 
                 _.forEach(pepper.properties, function (value, key) {
                     if (value.type == "object" || value.type == "array") {
-                        let result = self.makeModel(key, value);
+                        let result = self.makeModel(key, value,_.get(prefils,key));
                         obj[salt][key] = result[0][key];
                         schemaObj[salt].elements.push(result[1][key]);
                     } else {
-                        let result = self.makeModel(key, value);
+                        let result = self.makeModel(key, value,_.get(prefils,key));
                         obj[salt][key] = result[0];
                         schemaObj[salt].elements.push(result[1]);
                     }
@@ -241,7 +243,7 @@ export default {
                     type: "text",
                     placeholder: ("Enter " + salt)
                 };
-                return ["",element];
+                return [(prefils == null || prefils == undefined) ? "" : prefils,element];
             }
 
             if (pepper.type == "integer" || pepper.type == "number") {
@@ -253,7 +255,7 @@ export default {
                     type: "number",
                     placeholder: ("Enter " + salt)
                 };
-                return [0,element];
+                return [(prefils == null || prefils == undefined) ? 0 : prefils,element];
             }
 
             if (pepper.type == "boolean") {
@@ -265,7 +267,7 @@ export default {
                     type: "checkbox",
                     placeholder: ""
                 };
-                return [false,element];
+                return [(prefils == null || prefils == undefined) ? false : prefils,element];
             }
 
             if (pepper.type == "array") {
@@ -287,7 +289,7 @@ export default {
                         elements: []
                     }
                     _.forEach(pepper.items.properties, function (value, key) {
-                        let result = self.makeModel(key, value);
+                        let result = self.makeModel(key, value,prefils);
                         obj[key] = result[0];
                         schemaObj.elements.push(result[1]);
                     });
@@ -309,7 +311,7 @@ export default {
                     arraySchemaobj.schema.type = "input";
                     arraySchemaobj.schema.element = element;
                     return [
-                        [""],arraySchemaobj
+                        [(prefils == null || prefils == undefined) ? "" : prefils],arraySchemaobj
                     ];
                 } else if (pepper.items.type == "integer" || pepper.type == "number") {
                     let element = {
@@ -323,7 +325,7 @@ export default {
                     arraySchemaobj.schema.type = "input";
                     arraySchemaobj.schema.element = element;
                     return [
-                        [0],arraySchemaobj
+                        [(prefils == null || prefils == undefined) ? 0 : prefils],arraySchemaobj
                     ];
                 } else if (pepper.type == "boolean") {
                     let element = {
@@ -337,7 +339,7 @@ export default {
                     arraySchemaobj.schema.type = "input";
                     arraySchemaobj.schema.element = element;
                     return [
-                        [false],
+                        [(prefils == null || prefils == undefined) ? false : prefils],
                         arraySchemaobj
                     ];
                 }
