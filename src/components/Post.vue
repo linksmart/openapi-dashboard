@@ -235,7 +235,7 @@ export default {
                 let element = {
                     label: salt,
                     name: salt,
-                    canRemove: true,
+                    canRemove: !pepper.readOnly,
                     readonly : pepper.readOnly,
                     element_type: "input",
                     type: "text",
