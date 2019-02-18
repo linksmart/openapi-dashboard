@@ -12,6 +12,9 @@
             <button type="button" class="btn btn-secondary btn-xs" @click="$router.back()">
                 <i class="fas fa-arrow-alt-circle-left"></i> Go back
             </button>
+            <button type="button" class="btn btn-secondary btn-xs" @click="$router.forward()">
+                <i class="fas fa-arrow-alt-circle-right"></i> Go forward
+            </button>
         </div>
     </div>
 </template>
