@@ -211,6 +211,9 @@ export default {
                 schemaObj[salt] = {
 
                     type: "Object",
+                    "removeObjectButtonText" : function(parentElementName) {
+                        return '<i class="fas fa-times-circle"></i>';
+                    },
                     name: salt,
                     canRemove: true,
                     canDuplicate: true,
@@ -276,12 +279,27 @@ export default {
                     name: salt,
                     canAdd: true,
                     canRemove: true,
+                    "addButtonText" : function(parentElementName) {
+                        return '<i class="fas fa-plus-circle"></i>';
+                    },
+                    "removeButtonText" : function(parentElementName) {
+                        return '<i class="fas fa-times-circle"></i>';
+                    },
+                    "removeObjectButtonText" : function(parentElementName) {
+                        return '<i class="fas fa-minus-circle"></i>';
+                    },
+                    "duplicateButtonText" : function(parentElementName) {
+                        return '<i class="fas fa-clone"></i>';
+                    },
                     schema: {}
                 }
                 if (pepper.items.type == "object") {
                     let obj = {};
                     let schemaObj = {
                         type: "Object",
+                        "removeObjectButtonText" : function(parentElementName) {
+                            return '<i class="fas fa-times-circle"></i>';
+                        },
                         name: salt,
                         canRemove: true,
                         canDuplicate: true,
