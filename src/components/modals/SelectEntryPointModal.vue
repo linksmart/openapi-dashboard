@@ -17,9 +17,6 @@
                             <li class="nav-item">
                                 <a class="nav-link rounded-circle active" :id="'entry-path-selector-'+tableIndex" data-toggle="pill" :href="'#pills-entry-path-'+tableIndex" role="tab" :aria-controls="'pills-entry-path-'+tableIndex" aria-selected="true">2</a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link rounded-circle" :class = "(isValidEntryData)?'':'disabled'" :id="'attribute-selector-'+tableIndex" data-toggle="pill" :href="'#pills-attribute-selector-'+tableIndex" role="tab" :aria-controls="'pills-attribute-selector-'+tableIndex" aria-selected="false">3</a>
-                            </li>
                         </ul>
                         <div class="tab-content">
                             <div class="tab-pane fade show active" :id="'pills-entry-path-'+tableIndex" role="tabpanel" :aria-labelledby="'entry-path-selector-'+tableIndex">
@@ -36,9 +33,6 @@
                             <small v-show='isValidEntryData' class="form-text text-success">Valid entry path</small>
                             <small v-show='!isValidEntryData' class="form-text text-danger">Invalid entry path (Select a property with type "array")</small>
                         </div>
-                        <div class="tab-pane fade" :id="'pills-attribute-selector-'+tableIndex" role="tabpanel" :aria-labelledby="'attribute-selector-'+tableIndex">
-                            <SelectAttributes :selected-attributes='selected_attributes' :entry-data-properties='entry_data_properties' @addAttribute="addAttribute(...arguments)" @removeAttribute="removeAttribute(...arguments)" @setRootId="setRootId(...arguments)"/>
-                        </div>
                         <div class="tab-pane fade" :id="'pills-request-params-'+tableIndex" role="tabpanel" :aria-labelledby="'request-params-'+tableIndex">
                             <div class="row">
                                 <div class="col-md-6">
@@ -46,7 +40,6 @@
                                                                 :server-url="serverUrl"
                                                                 :path="path"
                                                                 @on-request-params-change="handleRequestParamsChange"/>
-                                    <!-- <vue-form-generator :schema="schema" :model="model" :options="formOptions" @validated="onValidated"></vue-form-generator> -->
                                 </div>
                             </div>
                             <br>
@@ -55,13 +48,9 @@
 
                 </div>
                 <div class="modal-footer">
-                    <!-- <button type="button" class="btn btn-secondary" data-dismiss="modal" @click="$emit('closeModal')">Close</button> -->
                     <button v-show='!is_first_tab' class="btn btn-info" @click='previous'>Previous</button>
                     <button v-show='!is_last_tab' class="btn btn-info" @click='next'>Next</button>
-                    <!-- <router-link class="btn btn-primary" :to="{ name: 'test', params: { selected_attributes } }">
-                    Start crud
-                </router-link> -->
-                <button type="button" v-show='isValidEntryData && !parameter_form_invalid && selected_attributes.length != 0' class="btn btn-primary" @click='startCrud'>Start CRUD</button>
+                <button type="button" v-show='isValidEntryData && !parameter_form_invalid' class="btn btn-primary" @click='startCrud'>Start CRUD</button>
             </div>
         </div>
     </div>
@@ -242,6 +231,20 @@
                 });
             },
             startCrud() {
+                if (!this.isValidEntryData) {
+                    console.log("invalid entry data selection");
+                    return;
+                }
+                _.forEach(this.entry_data_properties,(entry_data_property,key) => {
+                    this.selected_attributes.push({
+                        name: key,
+                        config_path: key,
+                        data_path: key,
+                        type: entry_data_property.type,
+                        isRoot: false
+                    });
+                });
+
                 this.$emit('startCrud',{
                     selected_attributes: this.selected_attributes,
                     entry_data_properties: this.entry_data_properties,
