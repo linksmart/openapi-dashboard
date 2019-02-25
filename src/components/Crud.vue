@@ -1,17 +1,18 @@
 <template >
     <div class="container-fluid">
-        <div class="card">
+        <div v-show="!isTableView" class="card">
             <div class="card-body">
-                    <vue-bootstrap4-table :columns="columns"
+                    <vue-bootstrap4-table :columns="formViewColumns"
                                         :config="config"
-                                        :rows="rows"
-                                        :actions="actions"
+                                        :rows="data"
+                                        :actions="formViewActions"
                                         :classes="classes"
                                         @on-update-columns="showModal = true"
                                         @on-post="goToPost"
                                         @on-change-query="onChangeQuery"
                                         @on-refresh="onRefresh"
                                         @on-reset-state="onResetState"
+                                        @switch-to-table-view="isTableView = !isTableView"
                                         :totalRows="totalRows">
                         <template slot="actions" slot-scope="props">
                             <div class="btn-group btn-group-xs" role="group" aria-label="Actions">
@@ -27,11 +28,43 @@
                                         </button>
                                     </template>
                                 </template>
-                                <!-- <template v-if="canPut">
-                                    <button v-for="(action,index) in putActions" :key="index" @click.prevent='handleDelete(action,props.row)' data-toggle="tooltip" data-placement="top" title="Delete" class="btn btn-sm btn-secondary btn-action">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                </template> -->
+                            </div>
+                        </template>
+                        <template slot="id" slot-scope="props">
+                            <form-view :preloaded-model="props.row"></form-view>
+                        </template>
+                    </vue-bootstrap4-table>
+            </div>
+        </div>
+        <br>
+        <div v-show="isTableView" class="card">
+            <div class="card-body">
+                    <vue-bootstrap4-table :columns="columns"
+                                        :config="config"
+                                        :rows="rows"
+                                        :actions="actions"
+                                        :classes="classes"
+                                        @on-update-columns="showModal = true"
+                                        @on-post="goToPost"
+                                        @on-change-query="onChangeQuery"
+                                        @on-refresh="onRefresh"
+                                        @on-reset-state="onResetState"
+                                        @switch-to-form-view="isTableView = !isTableView"
+                                        :totalRows="totalRows">
+                        <template slot="actions" slot-scope="props">
+                            <div class="btn-group btn-group-xs" role="group" aria-label="Actions">
+                                <template v-for="(action,index) in rowActions">
+                                    <template v-if="action.method == 'delete'">
+                                        <button :key="index" @click.prevent='handleDelete(action,props.row)' data-toggle="tooltip" data-placement="top" title="Delete" class="btn btn-sm btn-danger btn-action">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </template>
+                                    <template v-if="action.method == 'put'">
+                                        <button :key="index" @click.prevent='handlePut(action,props.row)' data-toggle="tooltip" data-placement="top" title="Put" class="btn btn-sm btn-secondary btn-action">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                    </template>
+                                </template>
                             </div>
                         </template>
                     </vue-bootstrap4-table>
@@ -70,6 +103,7 @@ import SelectAttributesModal from './modals/SelectAttributesModal.vue';
 import DeleteModal from './modals/DeleteModal.vue';
 import SuccessResponse from "./modals/SuccessResponse.vue";
 import FailureResponse from "./modals/FailureResponse.vue";
+import FormView from "./FormView.vue";
 
 var _ = {
   forEach: require('lodash/forEach'),
@@ -93,6 +127,7 @@ export default {
             request_params: {},
             rows: [],
             columns: [],
+            formViewColumns: [],
             data: [],
             paths: [],
             showModal: false,
@@ -138,6 +173,28 @@ export default {
                     btn_text: "Reset",
                     event_name: "on-reset-state"
                 },
+                {
+                    btn_text: "Form View",
+                    event_name: "switch-to-form-view"
+                },
+            ],
+            formViewActions: [
+                {
+                    btn_text: "Post",
+                    event_name: "on-post"
+                },
+                {
+                    btn_text: "Refresh",
+                    event_name: "on-refresh"
+                },
+                {
+                    btn_text: "Reset",
+                    event_name: "on-reset-state"
+                },
+                {
+                    btn_text: "Table View",
+                    event_name: "switch-to-table-view"
+                },
             ],
             rowActions : [],
             deleteRequestParameters: [],
@@ -150,6 +207,7 @@ export default {
             failureResponse: {},
             showSuccessResponseModal: false,
             showFailureResponseModal: false,
+            isTableView: true,
         }
     },
     components: {
@@ -157,7 +215,8 @@ export default {
         VueBootstrap4Table,
         DeleteModal,
         SuccessResponse,
-        FailureResponse
+        FailureResponse,
+        FormView
     },
     mounted(){
         this.stateIndex = this.crudStateIndex(this.$route.query.path,this.$route.query.method);
@@ -189,6 +248,7 @@ export default {
         }
         this.getData(this.fullUrl);
         this.generateColumns();
+        this.generateFormViewColumns();
         this.generateRows();
     },
     methods: {
@@ -334,7 +394,27 @@ export default {
                 column_text_alignment:  "text-left"
             };
             columns.push(actionColumn);
-            this.columns = columns ;
+            this.columns = columns;
+        },
+        generateFormViewColumns() {
+            let columns = [];
+
+            columns.push({
+                column_text_alignment:"text-left",
+                label:"Form view",
+                name:"id",
+                row_text_alignment:"text-left",
+            });
+
+            let actionColumn = {
+                label:"Action",
+                name:"actions",
+                row_text_alignment:  "text-left",
+                column_text_alignment:  "text-left"
+            };
+
+            columns.push(actionColumn);
+            this.formViewColumns = columns;
         },
         onChangeQuery(queryParams) {
             this.queryParams = queryParams;
@@ -372,6 +452,7 @@ export default {
             this.selected_attributes = selected_attributes;
             this.updateCrudTableViewStateSelectedAttributes({index : this.stateIndex, selectedAttributes : selected_attributes});
             this.generateColumns();
+            this.generateFormViewColumns();
             this.generateRows(this.data);
         }
     },

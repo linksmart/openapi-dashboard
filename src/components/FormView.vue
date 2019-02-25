@@ -1,11 +1,11 @@
 <template>
 <div class="container-fluid">
-    <br>
-    <div class="card">
-        <div class="card-header">
+    <br v-if="!isInTable">
+    <div :class="{'card' : !isInTable}">
+        <div class="card-header" v-if="!isInTable">
             Form view <span class="badge badge-info">Read-only</span>
         </div>
-        <div class="card-body">
+        <div :class="{'card-body' : !isInTable}">
             <vue-bootstrap4-form-generator :model="model" :schema="schema" :defaults="defaults" />
         </div>
     </div>
@@ -32,19 +32,35 @@ export default {
             req_params_defaults: {},
             post_error: "",
             post_success: "",
-            url: ""
+            url: "",
+            isInTable: false
+        }
+    },
+    props: {
+        preloadedModel: {
+            type: Object | Array,
+            default: function () {
+                return {}
+            }
         }
     },
     mounted() {
         this.url = this.$route.params.url;
-        axios.get(this.url)
-        .then((response) => {
-            this.model = response.data;
+        if (this.url) {
+            axios.get(this.url)
+            .then((response) => {
+                this.model = response.data;
+                this.transformToSchema();
+                this.defaults = _.cloneDeep(this.model);
+            })
+            .catch((error) => {
+            })
+        } else {
+            this.model = _.cloneDeep(this.preloadedModel);
             this.transformToSchema();
-            this.defaults = _.cloneDeep(this.model);
-        })
-        .catch((error) => {
-        })
+            this.defaults = _.cloneDeep(this.preloadedModel);
+            this.isInTable = true;
+        }
 
     },
     components: {
